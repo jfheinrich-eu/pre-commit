@@ -51,21 +51,18 @@ include:
       options: --only-severity=critical,high,medium --epss
 
 docker-scout-cves:
-  needs:
-    - job: prepare_environment
-      artifacts: true
+  dependencies:
+    - prepare_environment
 
 container_scanning:
-  needs:
-    - job: prepare_environment
-      artifacts: true
+  dependencies:
+    - prepare_environment
 
 docker-build:
   image: docker:cli
   stage: build
-  needs:
-    - job: prepare_environment
-      artifacts: true
+  dependencies:
+    - prepare_environment
   script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
     - docker build --pull -t "$DOCKER_IMAGE_NAME" .
