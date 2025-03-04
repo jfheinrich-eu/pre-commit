@@ -10,7 +10,7 @@ stages:
 
 default:
   tags:
-    - docker
+    - gitlab-org
     
 sast:
   stage: test
