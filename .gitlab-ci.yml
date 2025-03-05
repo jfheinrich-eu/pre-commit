@@ -45,7 +45,7 @@ prepare_environment:
     - echo "CS_IMAGE=$CS_IMAGE" >> variables.env
     - echo "DOCKER_IMAGE_NAME=$DOCKER_IMAGE_NAME" >> variables.env
     - echo "CI_REGISTRY_IMAGE=$CI_REGISTRY_IMAGE" >> variables.env
-    - echo "DOCKER_HOST=tcp://docker:2376"
+    - echo "DOCKER_HOST=tcp://docker:2376" >> variables.env
   artifacts:
     reports:
       dotenv: variables.env
