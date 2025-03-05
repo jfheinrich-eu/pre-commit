@@ -40,7 +40,6 @@ prepare_environment:
     - echo "CS_IMAGE=$CS_IMAGE" >> variables.env
     - echo "DOCKER_IMAGE_NAME=$DOCKER_IMAGE_NAME" >> variables.env
     - echo "CI_REGISTRY_IMAGE=$CI_REGISTRY_IMAGE" >> variables.env
-    - cat variables.env
   artifacts:
     reports:
       dotenv: variables.env
@@ -67,20 +66,19 @@ container_scanning:
     - prepare_environment
 
 docker-build:
-  image: docker:cli
+  image: docker:latest
   stage: build
   dependencies:
     - prepare_environment
   script:
-    - echo "$CI_REGISTRY"
-    - echo "$CI_REGISTRY_USER"
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-    - docker build --pull -t "$DOCKER_IMAGE_NAME" .
+    - echo -n "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - docker build --no-cache -t "$DOCKER_IMAGE_NAME" .
     - |
       if [[ "$CI_COMMIT_BRANCH" == "main" ]]; then
         docker push "$DOCKER_IMAGE_NAME"
         docker tag "$DOCKER_IMAGE_NAME" "$CI_REGISTRY_IMAGE:latest"
         docker push "$CI_COMMIT_BRANCH"
+  after_script:
     - docker logout $CI_REGISTRY
   rules:
     - if: $CI_COMMIT_BRANCH
