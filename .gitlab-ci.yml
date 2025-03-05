@@ -24,15 +24,23 @@ prepare_environment:
       cp "${PSONO_CONFIG}" .psono-config.conf
       source .psono-config.conf
       rm -f .psono-config.conf
-      echo "CI_REGISTRY=\"$(./psonoci env-vars get-or-create 5497576f-d518-47cc-89ba-b9329f83897a CI_REGISTRY)\"" >> variables.env
-      echo "CI_REGISTRY_IMAGE_PREFIX=\"$(./psonoci env-vars get-or-create 5497576f-d518-47cc-89ba-b9329f83897a CI_REGISTRY_IMAGE_PREFIX)\"" >> variables.env
-      echo "CI_REGISTRY_PASSWORD=\"$(./psonoci env-vars get-or-create 5497576f-d518-47cc-89ba-b9329f83897a CI_REGISTRY_PASSWORD)\"" >> variables.env
-      echo "CI_REGISTRY_USER=\"$(./psonoci env-vars get-or-create 5497576f-d518-47cc-89ba-b9329f83897a CI_REGISTRY_USER)\"" >> variables.env
-      source ./variables.env
-      echo "GIT_STRATEGY=\"fetch\"" >> variables.env
-      echo "CS_IMAGE=\"$CI_REGISTRY_IMAGE_PREFIX/pre-commit:$CI_COMMIT_REF_SLUG\"" >> variables.env
-      echo "DOCKER_IMAGE_NAME=\"$CI_REGISTRY_IMAGE_PREFIX/pre-commit:$CI_COMMIT_REF_SLUG\"" >> variables.env
-      echo "CI_REGISTRY_IMAGE=\"$CI_REGISTRY_IMAGE_PREFIX/pre-commit\"" >> variables.env
+    - CI_REGISTRY="$(./psonoci env-vars get-or-create 5497576f-d518-47cc-89ba-b9329f83897a CI_REGISTRY)"
+    - CI_REGISTRY_IMAGE_PREFIX="$(./psonoci env-vars get-or-create 5497576f-d518-47cc-89ba-b9329f83897a CI_REGISTRY_IMAGE_PREFIX)"
+    - CI_REGISTRY_PASSWORD="$(./psonoci env-vars get-or-create 5497576f-d518-47cc-89ba-b9329f83897a CI_REGISTRY_PASSWORD)"
+    - CI_REGISTRY_USER="$(./psonoci env-vars get-or-create 5497576f-d518-47cc-89ba-b9329f83897a CI_REGISTRY_USER)"
+    - GIT_STRATEGY="fetch"
+    - CS_IMAGE="$CI_REGISTRY_IMAGE_PREFIX/pre-commit:$CI_COMMIT_REF_SLUG"
+    - DOCKER_IMAGE_NAME="$CI_REGISTRY_IMAGE_PREFIX/pre-commit:$CI_COMMIT_REF_SLUG"
+    - CI_REGISTRY_IMAGE="$CI_REGISTRY_IMAGE_PREFIX/pre-commit"
+    - echo "CI_REGISTRY=$CI_REGISTRY" >> variables.env
+    - echo "CI_REGISTRY_IMAGE_PREFIX=$CIREGISTRY_IMAGE_PREFIX" >> variables.env
+    - echo "CI_REGISTRY_PASSWORD=$CI_REGISTRY_PASSWORD" >> variables.env
+    - echo "CI_REGISTRY_USER=$CI_REGISTRY_USER" >> variables.env
+    - echo "GIT_STRATEGY=fetch" >> variables.env
+    - echo "CS_IMAGE=$CS_IMAGE" >> variables.env
+    - echo "DOCKER_IMAGE_NAME=$DOCKER_IMAGE_NAME" >> variables.env
+    - echo "CI_REGISTRY_IMAGE=$CI_REGISTRY_IMAGE" >> variables.env
+    - cat variables.env
   artifacts:
     reports:
       dotenv: variables.env
@@ -64,6 +72,8 @@ docker-build:
   dependencies:
     - prepare_environment
   script:
+    - echo "$CI_REGISTRY"
+    - echo "$CI_REGISTRY_USER"
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
     - docker build --pull -t "$DOCKER_IMAGE_NAME" .
     - |
