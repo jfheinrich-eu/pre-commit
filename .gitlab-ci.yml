@@ -11,16 +11,9 @@ stages:
   - test
 
 variables:
-  DOCKER_TLS_CERTDIR: /certs
-  DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
-  DOCKER_HOST: tcp://docker:2376
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_HOST: tcp://docker:2375
   DOCKER_DRIVER: overlay2
-
-services:
-  - docker:28-dind
-
-before_script:
-  - docker info
 
 default:
   tags:
@@ -52,7 +45,6 @@ prepare_environment:
     - echo "CS_IMAGE=$CS_IMAGE" >> variables.env
     - echo "DOCKER_IMAGE_NAME=$DOCKER_IMAGE_NAME" >> variables.env
     - echo "CI_REGISTRY_IMAGE=$CI_REGISTRY_IMAGE" >> variables.env
-    - echo "DOCKER_HOST=tcp://docker:2376" >> variables.env
   artifacts:
     reports:
       dotenv: variables.env
