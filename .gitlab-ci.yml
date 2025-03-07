@@ -20,7 +20,7 @@ services:
 
 default:
   tags:
-    - gitlab_org
+    - gitlabr-org
 
 prepare_environment:
   stage: .pre
