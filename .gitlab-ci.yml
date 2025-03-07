@@ -11,16 +11,16 @@ stages:
   - test
 
 variables:
-  DOCKER_TLS_CERTDIR: ""
-  DOCKER_HOST: tcp://docker:2375
-  DOCKER_DRIVER: overlay2
+  # DOCKER_TLS_CERTDIR: ""
+  # DOCKER_HOST: tcp://docker:2375
+  # DOCKER_DRIVER: overlay2
 
 services:
   - docker:28-dind
 
 default:
   tags:
-    - docker
+    - gitlab_org
 
 prepare_environment:
   stage: .pre
@@ -49,6 +49,7 @@ prepare_environment:
     - echo "DOCKER_IMAGE_NAME=$DOCKER_IMAGE_NAME" >> variables.env
     - echo "CI_REGISTRY_IMAGE=$CI_REGISTRY_IMAGE" >> variables.env
   artifacts:
+    expire_in: 1h
     reports:
       dotenv: variables.env
 
