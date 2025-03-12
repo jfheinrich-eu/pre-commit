@@ -15,6 +15,7 @@ COPY entrypoint.sh /builds/entrypoint.sh
 RUN <<EOF
 mv /builds/.pre-commit-config.yaml /root/.pre-commit-config.yaml
 mv /builds/entrypoint.sh /usr/bin/entrypoint.sh && chmod 755 /usr/bin/entrypoint.sh
+pre-commit autoupdate --repo https://github.com/pre-commit/pre-commit-hooks -c /root/.pre-commit-config.yaml
 EOF
 
 WORKDIR /builds
