@@ -10,7 +10,7 @@ stages:
 
 variables:
   GIT_STRATEGY: fetch
-  CS_DOCKERFILE_PATH: ./Dockerfile
+  CS_DOCKERFILE_PATH: .
 
 default:
   tags:
