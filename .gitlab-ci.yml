@@ -7,13 +7,22 @@
 # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
 stages:
 - test
+
+variables:
+  CS_DOCKERFILE_PATH: ./Dockerfile
+
 default:
   tags:
-  - gitlab-org
+  - saas-linux-small-amd64
+
 sast:
   stage: test
+
 include:
 - template: Security/SAST.gitlab-ci.yml
 - template: Security/SAST-IaC.latest.gitlab-ci.yml
 - template: Jobs/Container-Scanning.gitlab-ci.yml
+  inputs:
+    stage: test
+    git_strategy: "fetch"
 - template: Security/Secret-Detection.gitlab-ci.yml
