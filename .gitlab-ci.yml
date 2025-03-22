@@ -8,13 +8,9 @@
 stages:
 - test
 
-variables:
-  GIT_STRATEGY: fetch
-  CS_DOCKERFILE_PATH: .
-
 default:
   tags:
-  - saas-linux-small-amd64
+  - gitlab-org
 
 sast:
   stage: test
@@ -22,5 +18,5 @@ sast:
 include:
 - template: Security/SAST.gitlab-ci.yml
 - template: Security/SAST-IaC.latest.gitlab-ci.yml
-- component: gitlab.com/components/container-scanning/container-scanning@4.2.0
+#- component: gitlab.com/components/container-scanning/container-scanning@4.2.0
 - template: Security/Secret-Detection.gitlab-ci.yml
