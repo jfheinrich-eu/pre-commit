@@ -8,9 +8,6 @@
 stages:
 - test
 
-variables:
-  CS_DOCKERFILE_PATH: ./Dockerfile
-
 default:
   tags:
   - saas-linux-small-amd64
@@ -22,7 +19,4 @@ include:
 - template: Security/SAST.gitlab-ci.yml
 - template: Security/SAST-IaC.latest.gitlab-ci.yml
 - component: gitlab.com/components/container-scanning/container-scanning@4.2.0
-  inputs:
-    stage: test
-    git_strategy: "fetch"
 - template: Security/Secret-Detection.gitlab-ci.yml
