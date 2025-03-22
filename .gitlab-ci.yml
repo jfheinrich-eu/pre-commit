@@ -8,6 +8,10 @@
 stages:
 - test
 
+variables:
+  GIT_STRATEGY: fetch
+  CS_DOCKERFILE_PATH: ./Dockerfile
+
 default:
   tags:
   - saas-linux-small-amd64
