@@ -1,8 +1,10 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v5.0.0
     hooks:
+      - id: no-commit-to-branch
       - id: check-merge-conflict
+        args: [--assume-in-merge]
       - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
       - id: destroyed-symlinks
@@ -10,3 +12,9 @@ repos:
       - id: fix-byte-order-marker
       - id: mixed-line-ending
       - id: trailing-whitespace
+  - repo: https://github.com/thoughtworks/talisman
+    rev: "v1.33.0"
+    hooks:
+      # both pre-commit and pre-push supported
+      # -   id: talisman-push
+      - id: talisman-commit
