@@ -19,8 +19,8 @@ create-release-tag:
   stage: release
   image: registry.gitlab.com/gitlab-ci-utils/curl-jq:latest
   variables:
-    CREATE_TAG_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags?tag_name=${GitVersion_LegacySemVer}&ref=${CI_COMMIT_BRANCH}&message=v${GitVersion_LegacySemVer"
-    tag: "${GitVersion_LegacySemVer}"
+    CREATE_TAG_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags?tag_name=${GitVersion_MajorMinorPatch}&ref=${CI_COMMIT_BRANCH}&message=v${GitVersion_MajorMinorPatch"
+    tag: "${GitVersion_MajorMinorPatch}"
   script:
     - 'curl --request POST --header "PRIVATE-TOKEN: ${PAT}" --url "${CREATE_TAG_URL}"'
   rules:
@@ -38,7 +38,7 @@ create-changelog:
     - 'curl -H "PRIVATE-TOKEN: ${PAT}" "${CHANGELOG_URL}" | jq -r .notes > release_notes.md'
     - 'curl -H "PRIVATE-TOKEN: ${PAT}" -X POST --data "message=${CHANGELOG_COMMIT_MESSAGE}; [skip ci]" "${CHANGELOG_URL}"'
   after_script:
-    - echo "${GitVersion_LegacySemVer}" > .build-version
+    - echo "${GitVersion_MajorMinorPatch}" > .build-version
     - git config user.email "joerg@jfheinrich.eu"
     - git config user.name "ci-bot"
     - git remote set-url --push origin "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
