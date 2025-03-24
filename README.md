@@ -89,6 +89,25 @@ or get help for a specific pre-commit command:
 docker run --rm -v $(pwd):/builds jfheinrich/pre-commit:latest --no-build-in-config -- help [pre-commit command]
 ```
 
+Get a shell into the container
+
+```bash
+docker run --rm -v $(pwd):/builds jfheinrich/pre-commit:latest --shell
+```
+
+Update your local pre-commit config
+
+```bash
+docker run --rm -v $(pwd):/builds jfheinrich/pre-commit:latest --update-hook .pre-commit-config.yaml
+```
+
+Get a copy of the internal pre-commit configuration as example
+
+```bash
+docker run --rm -v $(pwd):/builds jfheinrich/pre-commit:latest --copy-config-example
+```
+
+
 Example run of the pre-commit image:
 
 ```bash

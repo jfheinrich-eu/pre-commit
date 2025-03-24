@@ -1,5 +1,5 @@
 OS := $(shell uname -s)
-image_tag := 1.1.0
+image_tag := $(shell cat .build-version)
 platform := "linux/arm64,linux/amd64,linux/amd64/v2,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/mips64le,linux/arm/v7,linux/arm/v6"
 
 build-and-push: use-orbstack use-parallel-builder
