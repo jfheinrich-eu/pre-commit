@@ -79,6 +79,6 @@ pre-commit:
     name: jfheinrich/pre-commit:latest
     entrypoint: [""]
   script:
-    - pre-commit run --color always --config .pre-commit-ci.yaml --files $(git diff-tree --name-only --no-commit-id $(CI_MERGE_REQUEST_TARGET_BRANCH_SHA)
+    - pre-commit run --color always --config .pre-commit-ci.yaml --files $(git diff-tree --name-only --no-commit-id ${CI_MERGE_REQUEST_TARGET_BRANCH_SHA})
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
