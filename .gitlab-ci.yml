@@ -78,7 +78,12 @@ pre-commit:
   image:
     name: jfheinrich/pre-commit:latest
     entrypoint: [""]
+  variables:
+    MERGE_REQUEST_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}"
+  before_script:
+    - apk add --update jq curl
   script:
-    - pre-commit run --color always --config .pre-commit-ci.yaml --files $(git diff-tree --name-only --no-commit-id ${CI_MERGE_REQUEST_TARGET_BRANCH_SHA})
+    - 'curl --request GET --header "PRIVATE-TOKEN: ${PAT}" --url ${MERGE_REQUEST_URL} > mr-infos.json'
+    - pre-commit run --color always --config .pre-commit-config.yaml --from-ref $(jq .diff_refs.base_sha mr-infos.json) --to-ref $(jq .diff_refs.head_sha)
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
