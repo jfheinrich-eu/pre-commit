@@ -18,7 +18,7 @@ create-changelog:
       when: never
     - if: $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/
 
-update-buid-version:
+update-build-version:
   stage: release
   image: docker
   variables:
