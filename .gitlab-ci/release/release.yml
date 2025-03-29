@@ -5,7 +5,7 @@ prepare_release:
     - job: create-changelog
       optional: false
       artifacts: true
-    - job: update-buid-version
+    - job: update-build-version
       optional: false
   variables:
     release:
