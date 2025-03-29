@@ -3,6 +3,7 @@ repos:
     rev: v5.0.0
     hooks:
       - id: no-commit-to-branch
+        args: [--branch, develop, --branch, main, --branch, master]
       - id: check-merge-conflict
         args: [--assume-in-merge]
       - id: check-executables-have-shebangs
@@ -12,6 +13,9 @@ repos:
       - id: fix-byte-order-marker
       - id: mixed-line-ending
       - id: trailing-whitespace
+      - id: check-yaml
+      - id: check-json
+      - id: detect-private-key
   - repo: https://github.com/thoughtworks/talisman
     rev: "v1.33.0"
     hooks:

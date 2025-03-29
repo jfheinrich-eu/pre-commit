@@ -53,7 +53,7 @@ make docker-login -e DOCKERUSER=<Username> build-and-push
 Logout form docker hub:
 
 ```bash
-make docker logout
+make docker-logout
 ```
 
 ## Usage
@@ -66,7 +66,7 @@ to get the image options:
 $ docker run --rm -v $(pwd):/builds jfheinrich/pre-commit:1.1.0  --image-help
   Docker image options:
 
-  -i | --image-help         Shiw this help page
+  -i | --image-help         Show this help page
   -s | --shell              Open a shell into the container
   -n | --no-build-in-config Do not use the internal .pre-commit-config.yaml
   -e | --env                Set environment variables for pre-commit
@@ -147,6 +147,7 @@ repos:
     rev: v5.0.0
     hooks:
       - id: no-commit-to-branch
+        args: [--branch, develop, --branch, main, --branch, master]
       - id: check-merge-conflict
         args: [--assume-in-merge]
       - id: check-executables-have-shebangs
