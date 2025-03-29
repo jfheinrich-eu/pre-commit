@@ -84,7 +84,7 @@ pre-commit:
     - apk add --update jq curl
   script:
     - 'curl --request GET --header "PRIVATE-TOKEN: ${PAT}" --url ${MERGE_REQUEST_URL} > mr-infos.json'
-    - "git diff-tree --name-only --no-commit-id --merge-base $(jq .diff_refs.base_sha mr-infos.json) $(jq .diff_refs.head_sha mr-infos.json)"
+    - "git diff-tree --name-only --no-commit-id $(jq .diff_refs.head_sha mr-infos.json)"
     - 'echo "$(git diff --name-only --no-ext-diff -z "$(jq .diff_refs.base_sha mr-infos.json)".."$(jq .diff_refs.head_sha mr-infos.json)")"'
     #- pre-commit run --color always --config .pre-commit-config.yaml --from-ref $(jq .diff_refs.base_sha mr-infos.json) --to-ref $(jq .diff_refs.head_sha mr-infos.json)
   rules:
