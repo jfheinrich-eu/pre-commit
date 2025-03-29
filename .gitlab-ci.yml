@@ -1,6 +1,8 @@
 stages:
   - test
+  - staging
   - release
+  - production
 
 default:
   tags:
@@ -14,78 +16,9 @@ include:
   - template: Security/SAST-IaC.latest.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
   - component: $CI_SERVER_FQDN/guided-explorations/ci-components/ultimate-auto-semversioning/ultimate-auto-semversioning@1.2.8
-
-create-release-tag:
-  stage: release
-  image: registry.gitlab.com/gitlab-ci-utils/curl-jq:latest
-  variables:
-    CREATE_TAG_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags?tag_name=${GitVersion_MajorMinorPatch}&ref=${CI_COMMIT_BRANCH}&message=v${GitVersion_MajorMinorPatch}"
-    tag: "${GitVersion_MajorMinorPatch}"
-  script:
-    - 'curl --request POST --header "PRIVATE-TOKEN: ${PAT}" --url "${CREATE_TAG_URL}"'
-    - 'curl --fail --request POST --form token=$TRIGGER_TOKEN --form ref=${tag} "${CI_API_V4_URL}/projects/${CI_PROJECT_TRIGGER}/trigger/pipeline"'
-  rules:
-    - if: $CI_COMMIT_TAG
-      when: never
-    - if: $CI_COMMIT_BRANCH == 'main'
-
-create-changelog:
-  stage: release
-  image: registry.gitlab.com/gitlab-ci-utils/curl-jq:latest
-  variables:
-    CHANGELOG_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/changelog?version=${CI_COMMIT_TAG}"
-    CHANGELOG_COMMIT_MESSAGE: "Add changelog for ${CI_COMMIT_TAG}"
-  script:
-    - 'curl -H "PRIVATE-TOKEN: ${PAT}" "${CHANGELOG_URL}" | jq -r .notes > release_notes.md'
-    - 'curl -H "PRIVATE-TOKEN: ${PAT}" -X POST --data "message=${CHANGELOG_COMMIT_MESSAGE}; [skip ci]" "${CHANGELOG_URL}"'
-    - 'echo RELEASE_DESCRIPTION="\"$(cat ./release_notes.md)\"" >> variables.env'
-  after_script:
-    - echo "${GitVersion_MajorMinorPatch}" > .build-version
-    - git config user.email "joerg@jfheinrich.eu"
-    - git config user.name "ci-bot"
-    - git remote set-url --push origin "https://gitlab-ci-token:${PAT}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
-    - git add .build-version
-    - 'git commit -m "update build version [skip-ci]"'
-    - git push origin HEAD:$CI_COMMIT_REF_NAME
-  artifacts:
-    paths:
-      - release_notes.md
-    expire_in: 1 hour
-    reports:
-      dotenv: variables.env
-  rules:
-    - if: $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/
-
-release_job:
-  stage: release
-  needs:
-    - job: create-changelog
-      optional: false
-      artifacts: true
-  image: registry.gitlab.com/gitlab-org/release-cli:latest
-  rules:
-    - if: $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/
-  script:
-    - echo "running release_job for $CI_COMMIT_TAG"
-  release:
-    name: "Release $CI_COMMIT_TAG"
-    description: "${RELEASE_DESCRIPTION}"
-    tag_name: "$CI_COMMIT_TAG"
-    ref: "$CI_COMMIT_SHA"
-
-pre-commit:
-  stage: test
-  image:
-    name: jfheinrich/pre-commit:latest
-    entrypoint: [""]
-  variables:
-    MERGE_REQUEST_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/changes"
-  before_script:
-    - apk add --update jq curl
-  script:
-    - |
-      curl --request GET --header "PRIVATE-TOKEN: ${PAT}" --url ${MERGE_REQUEST_URL} > mr-infos.json
-      export files="$(jq -r '.changes[] | if .deleted_file == false then .new_path else null end' mr-infos.json)"
-    - '[[ -z "$files" ]] || pre-commit run --color always --config .pre-commit-config.yaml --files $(echo $files)'
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  - local: .gitlab-ci/release/create-tag-pipeline.yml
+  - local: .gitlab-ci/release/create-release-files.yml
+  - local: .gitlab-ci/release/release.yml
+  - local: .gitlab-ci/stage-test.yml
+  - local: .gitlab-ci/stage-staging.yml
+  - local: .gitlab-ci/stage-production.yml

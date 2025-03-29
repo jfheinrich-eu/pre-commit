@@ -1,0 +1,22 @@
+production:
+  stage: production
+  image: docker
+  tags:
+    - saas-linux-medium-amd64
+    - saas-linux-small-arm64
+  when: manual
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/
+      when: always
+  services:
+    - docker:dind
+  before_script:
+    - apk add --update make
+    - echo "${$DOCKER_HUB_PASSWORD}" | docker login -u $DOCKER_HUB_USER -password-stdin
+  script:
+    - make ci-build-and-push
+  after_script:
+    - docker logout
+  environment:
+    name: production
+    url: https://hub.docker.com/r/jfheinrich/pre-commit

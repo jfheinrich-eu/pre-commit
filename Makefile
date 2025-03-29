@@ -2,10 +2,13 @@ OS := $(shell uname -s)
 image_tag := $(shell cat .build-version)
 platform := "linux/arm64,linux/amd64,linux/amd64/v2,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/mips64le,linux/arm/v7,linux/arm/v6"
 
-build-and-push: use-orbstack use-parallel-builder
-	docker buildx build --build-arg VERSION=$(image_tag) --platform=$(platform) --push -t jfheinrich/pre-commit:$(image_tag) -t jfheinrich/pre-commit:latest .
+build-and-push: use-orbstack use-parallel-builder --docker-buildx
 
 build: --use-orbstack --use-parallel-builder --docker-build scout
+
+ci-build-staging: --docker-build scout
+
+ci-build-and-push: --docker-buildx
 
 scout:
 	docker scout cves jfheinrich/pre-commit:$(image_tag)
@@ -21,6 +24,9 @@ create-parallel-builder:
 	docker buildx create --name mybuilder --use
 
 # Private Targets
+
+--docker-buildx:
+	docker buildx build --build-arg VERSION=$(image_tag) --platform=$(platform) --push -t jfheinrich/pre-commit:$(image_tag) -t jfheinrich/pre-commit:latest .
 
 --docker-build:
 	docker build --build-arg VERSION=$(image_tag) -t jfheinrich/pre-commit:$(image_tag) .
