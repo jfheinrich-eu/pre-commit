@@ -13,6 +13,9 @@ repos:
       - id: fix-byte-order-marker
       - id: mixed-line-ending
       - id: trailing-whitespace
+      - id: check-yaml
+      - id: check-json
+      - id: detect-private-key
   - repo: https://github.com/thoughtworks/talisman
     rev: "v1.33.0"
     hooks:

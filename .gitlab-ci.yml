@@ -83,7 +83,9 @@ pre-commit:
   before_script:
     - apk add --update jq curl
   script:
-    - 'curl --request GET --header "PRIVATE-TOKEN: ${PAT}" --url ${MERGE_REQUEST_URL} > mr-infos.json'
-    - pre-commit run --color always --config .pre-commit-config.yaml --files $(jq -r '.changes[].new_path?' /tmp/mr-infos.json)
+    - |
+      curl --request GET --header "PRIVATE-TOKEN: ${PAT}" --url ${MERGE_REQUEST_URL} > mr-infos.json
+      export files="$(jq -r '.changes[] | if .deleted_file == false then .new_path else null end' mr-infos.json)"
+    - '[[ -z "$files" ]] || pre-commit run --color always --config .pre-commit-config.yaml --files $(echo $files)'
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
