@@ -1,3 +1,20 @@
+## 1.1.2 (2025-03-29)
+
+### changed (3 changes)
+
+- [ci(pre-commit): refactor pre-commit job](https://gitlab.com/jfheinrich-dev/pre-commit/-/commit/41396f567567766cd7c76f7f7c85c66092065143) ([merge request](https://gitlab.com/jfheinrich-dev/pre-commit/-/merge_requests/12))
+- [ci(pre-commit): refactor job pre-commit](https://gitlab.com/jfheinrich-dev/pre-commit/-/commit/571ceceba664c1fa841f44ce8325da3b13651edd) ([merge request](https://gitlab.com/jfheinrich-dev/pre-commit/-/merge_requests/12))
+- [docs: update README.md](https://gitlab.com/jfheinrich-dev/pre-commit/-/commit/42c774d3497801a2e50a9e28692adbfb445b5c1d) ([merge request](https://gitlab.com/jfheinrich-dev/pre-commit/-/merge_requests/12))
+
+### added (2 changes)
+
+- [ci(pre-commit): add Giutab Merge Request API call to get a list of changed files](https://gitlab.com/jfheinrich-dev/pre-commit/-/commit/f52a466f7826494534ca8142af8a2c2d78d4aa08) ([merge request](https://gitlab.com/jfheinrich-dev/pre-commit/-/merge_requests/12))
+- [feat: add pre-commit job to the ci/cd pipeline](https://gitlab.com/jfheinrich-dev/pre-commit/-/commit/7769fceddbae1c3ba5ce2325b5194b6c26493be7) ([merge request](https://gitlab.com/jfheinrich-dev/pre-commit/-/merge_requests/12))
+
+### fixed (1 change)
+
+- [fix: resolve syntax issue in pre-comit job](https://gitlab.com/jfheinrich-dev/pre-commit/-/commit/61bc14237ee33f3f0a0e3911b2db98eddaeab8a0) ([merge request](https://gitlab.com/jfheinrich-dev/pre-commit/-/merge_requests/12))
+
 ## 1.1.1 (2025-03-24)
 
 ### changed (5 changes)
