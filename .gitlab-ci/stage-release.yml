@@ -1,4 +1,0 @@
-include:
-  - local: .gitlab-ci/release/create-tag-pipeline.yml
-  - local: .gitlab-ci/release/create-release-files.yml
-  - local: .gitlab-ci/release/release.yml

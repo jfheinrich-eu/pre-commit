@@ -14,6 +14,8 @@ create-changelog:
     reports:
       dotenv: variables.env
   rules:
+    - if: $CI_COMMIT_BRANCH
+      when: never
     - if: $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/
 
 update-buid-version:
@@ -34,4 +36,6 @@ update-buid-version:
     - git commit -m "${COMMIT_MESG}"
     - git push HEAD:$CI_COMMIT_REF_NAME
   rules:
+    - if: $CI_COMMIT_BRANCH
+      when: never
     - if: $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/

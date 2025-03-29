@@ -16,7 +16,9 @@ include:
   - template: Security/SAST-IaC.latest.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
   - component: $CI_SERVER_FQDN/guided-explorations/ci-components/ultimate-auto-semversioning/ultimate-auto-semversioning@1.2.8
-  - local: .gitlab-ci/stage-release.yml
+  - local: .gitlab-ci/release/create-tag-pipeline.yml
+  - local: .gitlab-ci/release/create-release-files.yml
+  - local: .gitlab-ci/release/release.yml
   - local: .gitlab-ci/stage-test.yml
   - local: .gitlab-ci/stage-staging.yml
   - local: .gitlab-ci/stage-production.yml
