@@ -1,0 +1,21 @@
+staging:
+  stage: staging
+  image: docker
+  tags:
+    - saas-linux-medium-amd64
+    - saas-linux-small-arm64
+  when: manual
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'develop'
+      when: always
+  services:
+    - docker:dind
+  before_script:
+    - apk add --update make
+    - echo "${$CI_REGISTRY_PASSWORD}" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER -password-stdin
+  script:
+    - make -e image_tag=$CI_COMNMIT_BRANCH-$CI_COMMIT_SHA ci-build-staging
+  after_script:
+    - docker logout $CI_REGISTRY
+  environment:
+    name: staging
