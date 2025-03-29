@@ -84,8 +84,8 @@ pre-commit:
     - apk add --update jq curl
   script:
     - 'curl --request GET --header "PRIVATE-TOKEN: ${PAT}" --url ${MERGE_REQUEST_URL} > mr-infos.json'
-    - 'export TARGET_BRANCH="$(jq .target_branch mr-infos.json)"'
-    - 'export SOURCE_BRANCH="$(jq .source_branch mr-infos.json)"'
+    - export TARGET_BRANCH="$(jq .target_branch mr-infos.json | sed -e 's/"//g')"
+    - export SOURCE_BRANCH="$(jq .source_branch mr-infos.json | sed -e 's/"//g')"
     - pre-commit run --color always --config .pre-commit-config.yaml --from-ref "origin/${TARGET_BRANCH}" --to-ref "origin/${SOURCE_BRANCH}"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
