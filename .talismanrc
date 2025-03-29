@@ -1,0 +1,4 @@
+fileignoreconfig:
+  - filename: .vscode/settings.json
+    checksum: 4f90f7643dc66389c01b4e31128be7bb7816c79ba223d6142b1ff48613470055
+version: ""
