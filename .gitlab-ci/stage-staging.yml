@@ -1,27 +1,33 @@
+prepare-staging:
+  extends:
+    - .prepare_psono
+  stage: staging
+  script:
+    - 'echo "CI_PSONO_REGISTRY=\"$(./psonoci -c ./psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY)\"" >> variables.env'
+    - 'echo "CI_PSONO_REGISTRY_PASSWORD=\"$(./psonoci -c ./psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_PASSWORD)\"" >> variables.env'
+    - 'echo "CI_PSONO_REGISTRY_USER=\"$(./psonoci -c ./psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_USER)\"" >> variables.env'
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'develop'
+  artifacts:
+    reports:
+      dotenv: variables.env
+
 staging:
   stage: staging
   image: docker
   tags:
     - saas-linux-small-amd64
+  needs:
+    - job: prepare-staging
+      optional: false
+      artifacts: true
   rules:
     - if: $CI_COMMIT_BRANCH == 'develop'
       when: manual
   services:
     - docker:dind
-  variables:
-    PSONO_CI_API_KEY_ID: ${PSONO_CI_API_KEY_ID}
-    PSONO_CI_API_SECRET_KEY_HEX: ${PSONO_CI_API_SECRET_KEY_HEX}
-    PSONO_CI_SERVER_URL: ${PSONO_CI_SERVER_URL}
   before_script:
-    - apk add --update make curl
-    - curl https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci --output psonoci && chmod +x psonoci
-    - |
-      export PSONO_CI_API_KEY_ID=${PSONO_CI_API_KEY_ID}
-      export PSONO_CI_API_SECRET_KEY_HEX=${PSONO_CI_API_SECRET_KEY_HEX}
-      export PSONO_CI_SERVER_URL=${PSONO_CI_SERVER_URL}
-      export CI_PSONO_REGISTRY="$(./psonoci env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY)"
-      export CI_PSONO_REGISTRY_PASSWORD="$(./psonoci env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_PASSWORD)"
-      export CI_PSONO_REGISTRY_USER="$(./psonoci env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_USER)"
+    - apk add --update make
     - echo "${CI_PSONO_REGISTRY_PASSWORD}" | docker login $CI_PSONO_REGISTRY -u $CI_PSONO_REGISTRY_USER -password-stdin
   script:
     - make -e image_tag=$CI_COMNMIT_BRANCH-$CI_COMMIT_SHA ci-build-staging
