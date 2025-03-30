@@ -22,3 +22,12 @@ include:
   - local: .gitlab-ci/stage-test.yml
   - local: .gitlab-ci/stage-staging.yml
   - local: .gitlab-ci/stage-production.yml
+
+.prepare_psono:
+  image: docker
+  tags:
+    - saas-linux-small-amd64
+  before_script:
+    - apk add --update curl
+    - curl https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci --output psonoci && chmod +x psonoci
+    - cp "${PSONO_CONFIG}" .psonoci.toml
