@@ -3,9 +3,9 @@ prepare-staging:
     - .prepare_psono
   stage: staging
   script:
-    - 'echo "CI_PSONO_REGISTRY=\"$(./psonoci -c ./psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY)\"" >> variables.env'
-    - 'echo "CI_PSONO_REGISTRY_PASSWORD=\"$(./psonoci -c ./psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_PASSWORD)\"" >> variables.env'
-    - 'echo "CI_PSONO_REGISTRY_USER=\"$(./psonoci -c ./psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_USER)\"" >> variables.env'
+    - 'echo "CI_PSONO_REGISTRY=\"$(./psonoci -c ./.psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY)\"" >> variables.env'
+    - 'echo "CI_PSONO_REGISTRY_PASSWORD=\"$(./.psonoci -c ./psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_PASSWORD)\"" >> variables.env'
+    - 'echo "CI_PSONO_REGISTRY_USER=\"$(./.psonoci -c ./psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_USER)\"" >> variables.env'
   rules:
     - if: $CI_COMMIT_BRANCH == 'develop'
   artifacts:
