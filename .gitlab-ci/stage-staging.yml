@@ -16,9 +16,9 @@ staging:
     - apk add --update make curl
     - curl https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci --output psonoci && chmod +x psonoci
     - |
-      export PSONO_CI_API_KEY_ID: ${PSONO_CI_API_KEY_ID}
-      export PSONO_CI_API_SECRET_KEY_HEX: ${PSONO_CI_API_SECRET_KEY_HEX}
-      export PSONO_CI_SERVER_URL: ${PSONO_CI_SERVER_URL}
+      export PSONO_CI_API_KEY_ID=${PSONO_CI_API_KEY_ID}
+      export PSONO_CI_API_SECRET_KEY_HEX=${PSONO_CI_API_SECRET_KEY_HEX}
+      export PSONO_CI_SERVER_URL=${PSONO_CI_SERVER_URL}
       export CI_PSONO_REGISTRY="$(./psonoci env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY)"
       export CI_PSONO_REGISTRY_PASSWORD="$(./psonoci env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_PASSWORD)"
       export CI_PSONO_REGISTRY_USER="$(./psonoci env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_USER)"
