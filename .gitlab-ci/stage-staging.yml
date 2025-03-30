@@ -28,7 +28,7 @@ staging:
     - docker:dind
   before_script:
     - apk add --update make
-    - echo "${CI_PSONO_REGISTRY_PASSWORD}" | docker login $CI_PSONO_REGISTRY -u $CI_PSONO_REGISTRY_USER -password-stdin
+    - echo "${CI_PSONO_REGISTRY_PASSWORD}" | docker login $CI_PSONO_REGISTRY -u $CI_PSONO_REGISTRY_USER --password-stdin
   script:
     - make -e image_tag=$CI_COMNMIT_BRANCH-$CI_COMMIT_SHA ci-build-staging
   after_script:
