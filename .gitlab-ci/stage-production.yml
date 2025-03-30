@@ -11,7 +11,7 @@ production:
     - docker:dind
   before_script:
     - apk add --update make
-    - echo "${$DOCKER_HUB_PASSWORD}" | docker login -u $DOCKER_HUB_USER -password-stdin
+    - echo "${DOCKER_HUB_PASSWORD}" | docker login -u $DOCKER_HUB_USER -password-stdin
   script:
     - make ci-build-and-push
   after_script:
