@@ -28,7 +28,7 @@ production:
     - docker:dind
   before_script:
     - apk add --update make
-    - echo "${CI_PSONO_REGISTRY_PASSWORD}" | docker login -u $CI_PSONO_REGISTRY_USER -password-stdin
+    - echo "${CI_PSONO_REGISTRY_PASSWORD}" | docker login -u $CI_PSONO_REGISTRY_USER --password-stdin
   script:
     - make -e image_tag=$CI_COMMIT_TAG ci-build-and-push
   after_script:
