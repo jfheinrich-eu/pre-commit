@@ -8,13 +8,23 @@ production:
       when: manual
   services:
     - docker:dind
+  variables:
+    PSONO_CI_API_KEY_ID: ${PSONO_CI_API_KEY_ID}
+    PSONO_CI_API_SECRET_KEY_HEX: ${PSONO_CI_API_SECRET_KEY_HEX}
+    PSONO_CI_SERVER_URL: ${PSONO_CI_SERVER_URL}
   before_script:
-    - apk add --update make
-    - echo "${DOCKER_HUB_PASSWORD}" | docker login -u $DOCKER_HUB_USER -password-stdin
+    - apk add --update make curl
+    - curl https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci --output psonoci && chmod +x psonoci
+    - |
+      export CI_PSONO_REGISTRY="$(./psonoci env-vars get-or-create ${PSONO_DOCKERHUB_REGISTRY_ID} CI_REGISTRY)"
+      export CI_PSONO_REGISTRY_IMAGE_PREFIX="$(./psonoci env-vars get-or-create ${PSONO_DOCKERHUB_REGISTRY_ID} CI_REGISTRY_IMAGE_PREFIX)"
+      export CI_PSONO_REGISTRY_PASSWORD="$(./psonoci env-vars get-or-create ${PSONO_DOCKERHUB_REGISTRY_ID} CI_REGISTRY_PASSWORD)"
+      export CI_PSONO_REGISTRY_USER="$(./psonoci env-vars get-or-create ${PSONO_DOCKERHUB_REGISTRY_ID} CI_REGISTRY_PASSWORD)"
+    - echo "${CI_PSONO_REGISTRY_PASSWORD}" | docker login -u $CI_PSONO_REGISTRY_USER -password-stdin
   script:
-    - make ci-build-and-push
+    - make -e image_tag=$CI_COMMIT_TAG ci-build-and-push
   after_script:
-    - docker logout
+    - docker logout ${CI_PSONO_REGISTRY}
   environment:
     name: production
     url: https://hub.docker.com/r/jfheinrich/pre-commit
