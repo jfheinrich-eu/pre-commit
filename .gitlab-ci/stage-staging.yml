@@ -3,10 +3,9 @@ staging:
   image: docker
   tags:
     - saas-linux-small-amd64
-  when: manual
   rules:
     - if: $CI_COMMIT_BRANCH == 'develop'
-      when: always
+      when: manual
   services:
     - docker:dind
   before_script:
