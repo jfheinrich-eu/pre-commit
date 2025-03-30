@@ -2,9 +2,7 @@ staging:
   stage: staging
   image: docker
   tags:
-    - saas-linux-medium-amd64
     - saas-linux-small-amd64
-    - saas-linux-small-arm64
   when: manual
   rules:
     - if: $CI_COMMIT_BRANCH == 'develop'
