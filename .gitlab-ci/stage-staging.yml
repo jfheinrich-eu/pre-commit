@@ -8,12 +8,21 @@ staging:
       when: manual
   services:
     - docker:dind
+  variables:
+    PSONO_CI_API_KEY_ID: ${PSONO_CI_API_KEY_ID}
+    PSONO_CI_API_SECRET_KEY_HEX: ${PSONO_CI_API_SECRET_KEY_HEX}
+    PSONO_CI_SERVER_URL: ${PSONO_CI_SERVER_URL}
   before_script:
-    - apk add --update make
-    - echo "${PAT}" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER -password-stdin
+    - apk add --update make curl
+    - curl https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci --output psonoci && chmod +x psonoci
+    - |
+      export CI_PSONO_REGISTRY="$(./psonoci env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY)"
+      export CI_PSONO_REGISTRY_PASSWORD="$(./psonoci env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_PASSWORD)"
+      export CI_PSONO_REGISTRY_USER="$(./psonoci env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_USER)"
+    - echo "${CI_PSONO_REGISTRY_PASSWORD}" | docker login $CI_PSONO_REGISTRY -u $CI_PSONO_REGISTRY_USER -password-stdin
   script:
     - make -e image_tag=$CI_COMNMIT_BRANCH-$CI_COMMIT_SHA ci-build-staging
   after_script:
-    - docker logout $CI_REGISTRY
+    - docker logout $CI_PSONO_REGISTRY
   environment:
     name: staging
