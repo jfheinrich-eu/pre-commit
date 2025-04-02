@@ -30,7 +30,7 @@ staging:
     - apk add --update make
     - echo "${CI_PSONO_REGISTRY_PASSWORD}" | docker login $CI_PSONO_REGISTRY -u $CI_PSONO_REGISTRY_USER --password-stdin
   script:
-    - make -e ci-build-staging
+    - make ci-build-staging
   after_script:
     - docker logout $CI_PSONO_REGISTRY
   environment:

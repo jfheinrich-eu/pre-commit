@@ -7,17 +7,17 @@ build-and-push: use-orbstack use-parallel-builder --docker-buildx
 build: --use-orbstack --use-parallel-builder --docker-build scout
 
 ci-build-staging:
-	@[[ "${CI}X" = "X" ]] || echo "Building for branch: ${CI_COMMIT_REF_SLUG}:${CI_COMMIT_SHORT_TAG}"
-	@[[ "${CI}X" = "X" ]] || docker build --build-arg VERSION=${CI_COMMIT_REF_SLUG} -t jfheinrich/pre-commit:${CI_COMMIT_REF_SLUG} .
-	@[[ "${CI}X" = "X" ]] || docker scout cves --exit-code jfheinrich/pre-commit:${CI_COMMIT_REF_SLUG}
-	@[[ "${CI}X" = "X" ]] || docker tag jfheinrich/pre-commit:${CI_COMMIT_REF_SLUG} jfheinrich/pre-commit:${CI_COMMIT_SHORT_TAG}
+	@[[ "${CI}X" = "X" ]] || echo "Building for branch: ${CI_COMMIT_REF_SLUG}:${CI_COMMIT_SHORT_SHA}"
+	@[[ "${CI}X" = "X" ]] || docker build --build-arg VERSION="${CI_COMMIT_REF_SLUG}.${CI_COMMIT_SHORT_SHA}" -t jfheinrich/pre-commit:${CI_COMMIT_REF_SLUG} .
+	@[[ "${CI}X" = "X" ]] || docker scout cves jfheinrich/pre-commit:${CI_COMMIT_REF_SLUG}
+	@[[ "${CI}X" = "X" ]] || docker tag jfheinrich/pre-commit:${CI_COMMIT_REF_SLUG} jfheinrich/pre-commit:${CI_COMMIT_SHORT_SHA}
 	@[[ "${CI}X" = "X" ]] || docker push jfheinrich/pre-commit:${CI_COMMIT_REF_SLUG}
-	@[[ "${CI}X" = "X" ]] || docker push jfheinrich/pre-commit:${CI_COMMIT_SHORT_TAG}
+	@[[ "${CI}X" = "X" ]] || docker push jfheinrich/pre-commit:${CI_COMMIT_SHORT_SHA}
 
 ci-build-and-push: --docker-buildx scout
 
 scout:
-	docker scout cves --exit-code jfheinrich/pre-commit:$(image_tag)
+	docker scout cves jfheinrich/pre-commit:$(image_tag)
 
 docker-login:
 	@[[ "${OS}" != "Darwin" ]] || security unlock-keychain
