@@ -1,0 +1,12 @@
+.gitlab-ci/
+.vscode/
+jfheinrich/
+.git/
+.gitlab-ci*.yml
+.psonoci.toml
+.talismanrc
+CHNAGELOG.md
+GitVersion.yml
+LICENSE
+Makefile
+*.md
