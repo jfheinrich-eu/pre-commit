@@ -1,6 +1,12 @@
-OS := $(shell uname -s)
-image_tag := $(shell cat .build-version)
-build_date := $(shell date --iso-8601=seconds)
+ifeq ($(OS),)
+	OS := $(shell uname -s)
+endif
+ifeq ($(image_tag),)
+	image_tag := $(shell cat .build-version)
+endif
+ifeq ($(build_date),)
+	build_date := $(shell date --iso-8601=seconds)
+endif
 platform := "linux/arm64,linux/amd64,linux/amd64/v2,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/mips64le,linux/arm/v7,linux/arm/v6"
 
 build-and-push: use-orbstack use-parallel-builder --docker-buildx
