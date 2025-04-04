@@ -30,7 +30,7 @@ production:
     - apk add --update make docker-cli-buildx
     - echo "${CI_PSONO_REGISTRY_PASSWORD}" | docker login -u $CI_PSONO_REGISTRY_USER --password-stdin
   script:
-    - make -e image_tag=$CI_COMMIT_TAG ci-build-and-push
+    - make -e image_tag=$CI_COMMIT_TAG -e build_date=$(date -Iseconds) ci-build-and-push
   after_script:
     - docker logout
   environment:
