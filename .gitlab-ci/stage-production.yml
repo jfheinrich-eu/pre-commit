@@ -27,7 +27,7 @@ production:
   services:
     - docker:dind
   before_script:
-    - apk add --update make
+    - apk add --update make docker-cli-buildx
     - echo "${CI_PSONO_REGISTRY_PASSWORD}" | docker login -u $CI_PSONO_REGISTRY_USER --password-stdin
   script:
     - make -e image_tag=$CI_COMMIT_TAG ci-build-and-push
