@@ -12,10 +12,6 @@ default:
 sast:
   stage: test
 
-container_scanning:
-  variables:
-    CS_IMAGE: ${CI_PSONO_REGISTRY}/jfheinrich-dev/pre-commit:${CI_COMMIT_REF_SLUG}
-
 include:
   - template: Security/SAST.gitlab-ci.yml
   - template: Security/SAST-IaC.latest.gitlab-ci.yml

@@ -1,20 +1,27 @@
 prepare_scanning:
   stage: test
   image: docker
+  cache:
+    - kes: cache-$CI_COMMIT_REF_SLUG
+      paths:
+        - psonoci
+        - .psonoci.toml
+      policy: push
   script:
     - apk add --update curl
     - curl https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci --output psonoci && chmod +x psonoci
     - cp "${PSONO_CONFIG}" .psonoci.toml
-  artifacts:
-    paths:
-      - psonoci
-      - .psonoci.toml
-    expire_in: 1 hour
 
 container_scanning:
   variables:
     CS_IMAGE: ${CI_PSONO_REGISTRY}/jfheinrich-dev/pre-commit:build
     GIT_STRATEGY: fetch
+  cache:
+    - kes: cache-$CI_COMMIT_REF_SLUG
+      paths:
+        - psonoci
+        - .psonoci.toml
+      policy: pull
   needs:
     - job: prepare_scanning
       optional: false
