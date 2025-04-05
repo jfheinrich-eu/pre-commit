@@ -14,7 +14,7 @@ prepare_scanning:
 
 container_scanning:
   variables:
-    - GIT_STRATEGY: fetch
+    GIT_STRATEGY: fetch
   cache:
     - key: cache-$CI_COMMIT_REF_SLUG
       paths:
