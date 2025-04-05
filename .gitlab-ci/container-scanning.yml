@@ -13,9 +13,6 @@ prepare_scanning:
     - cp "${PSONO_CONFIG}" .psonoci.toml
 
 container_scanning:
-  variables:
-    CS_IMAGE: ${CI_PSONO_REGISTRY}/jfheinrich-dev/pre-commit:build
-    GIT_STRATEGY: fetch
   cache:
     - key: cache-$CI_COMMIT_REF_SLUG
       paths:
@@ -30,13 +27,11 @@ container_scanning:
     - export CS_PSONO_REGISTRY=$(./psonoci -c ./.psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY)
     - export CS_PSONO_REGISTRY_PASSWORD=$(./psonoci -c ./.psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_PASSWORD)
     - export CS_PSONO_REGISTRY_USER=$(./psonoci -c ./.psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_USER)
+    - export SECURE_LOG_LEVEL=debug
+    - export GIT_STRATEGY=fetch
+    - export CS_IMAGE="${CS_PSONO_REGISTRY}/jfheinrich-dev/pre-commit:build"
+    - export CS_REGISTRY_USER="${CS_PSONO_REGISTRY_USER}"
+    - export CS_REGISTRY_PASSWORD="${CS_PSONO_REGISTRY_PASSWORD}"
 
 include:
   - template: Jobs/Container-Scanning.gitlab-ci.yml
-
-variables:
-  SECURE_LOG_LEVEL: debug
-  CS_IMAGE: "${CS_PSONO_REGISTRY}/jfheinrich-dev/pre-commit:build"
-  GIT_STRATEGY: fetch
-  CS_REGISTRY_USER: "${CS_PSONO_REGISTRY_USER}"
-  CS_REGISTRY_PASSWORD: "${CS_PSONO_REGISTRY_PASSWORD}"
