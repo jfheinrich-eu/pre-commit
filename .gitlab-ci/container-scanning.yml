@@ -1,0 +1,30 @@
+prepare_scanning:
+  stage: test
+  image: docker
+  before_script:
+    - apk add --update curl
+    - curl https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci --output psonoci && chmod +x psonoci
+    - cp "${PSONO_CONFIG}" .psonoci.toml
+
+container_scanning:
+  variables:
+    CS_IMAGE: ${CI_PSONO_REGISTRY}/jfheinrich-dev/pre-commit:build
+    GIT_STRATEGY: fetch
+  needs:
+    - job: prepare_scanning
+      optional: false
+      artifacts: true
+  before_script:
+    - export CS_PSONO_REGISTRY=$(./psonoci -c ./.psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY)
+    - export CS_PSONO_REGISTRY_PASSWORD=$(./psonoci -c ./.psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_PASSWORD)
+    - export CS_PSONO_REGISTRY_USER=$(./psonoci -c ./.psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_USER)
+
+include:
+  - template: Jobs/Container-Scanning.gitlab-ci.yml
+
+variables:
+  SECURE_LOG_LEVEL: debug
+  CS_IMAGE: "${CS_PSONO_REGISTRY}/jfheinrich-dev/pre-commit:build"
+  GIT_STRATEGY: fetch
+  CS_REGISTRY_USER: "${CS_PSONO_REGISTRY_USER}"
+  CS_REGISTRY_PASSWORD: "${CS_PSONO_REGISTRY_PASSWORD}"

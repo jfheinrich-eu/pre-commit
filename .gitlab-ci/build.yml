@@ -1,18 +1,3 @@
-container_scanning:
-  needs:
-    - job: prepare-build
-      optional: false
-      artifacts: true
-  variables:
-    CS_IMAGE: ${CI_PSONO_REGISTRY}/jfheinrich-dev/pre-commit:build
-    GIT_STRATEGY: fetch
-
-include:
-  - template: Jobs/Container-Scanning.gitlab-ci.yml
-    rules:
-      - if: $CI_COMMIT_BRANCH
-      - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-
 prepare-build:
   extends:
     - .prepare_psono
@@ -22,8 +7,6 @@ prepare-build:
     - 'echo "CI_PSONO_REGISTRY_PASSWORD=$(./psonoci -c ./.psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_PASSWORD)" >> variables.env'
     - 'echo "CI_PSONO_REGISTRY_USER=$(./psonoci -c ./.psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_USER)" >> variables.env'
     - 'echo "CI_REGISTRY=$(./psonoci -c ./.psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY)" >> variables.env'
-    - 'echo "CS_REGISTRY_PASSWORD=$(./psonoci -c ./.psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_PASSWORD)" >> variables.env'
-    - 'echo "CS_REGISTRY_USER=$(./psonoci -c ./.psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_USER)" >> variables.env'
   rules:
     - if: $CI_COMMIT_BRANCH
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
