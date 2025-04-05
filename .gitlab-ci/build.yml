@@ -22,8 +22,8 @@ prepare-build:
     - 'echo "CI_PSONO_REGISTRY_PASSWORD=$(./psonoci -c ./.psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_PASSWORD)" >> variables.env'
     - 'echo "CI_PSONO_REGISTRY_USER=$(./psonoci -c ./.psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_USER)" >> variables.env'
     - 'echo "CI_REGISTRY=$(./psonoci -c ./.psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY)" >> variables.env'
-    - 'echo "CI_REGISTRY_PASSWORD=$(./psonoci -c ./.psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_PASSWORD)" >> variables.env'
-    - 'echo "CI_REGISTRY_USER=$(./psonoci -c ./.psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_USER)" >> variables.env'
+    - 'echo "CS_REGISTRY_PASSWORD=$(./psonoci -c ./.psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_PASSWORD)" >> variables.env'
+    - 'echo "CS_REGISTRY_USER=$(./psonoci -c ./.psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_USER)" >> variables.env'
   rules:
     - if: $CI_COMMIT_BRANCH
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
