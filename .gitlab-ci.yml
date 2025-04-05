@@ -1,4 +1,5 @@
 stages:
+  - build
   - test
   - staging
   - release
@@ -11,6 +12,10 @@ default:
 sast:
   stage: test
 
+container_scanning:
+  variables:
+    CS_IMAGE: ${CI_PSONO_REGISTRY}/jfheinrich-dev/pre-commit:${CI_COMMIT_REF_SLUG}
+
 include:
   - template: Security/SAST.gitlab-ci.yml
   - template: Security/SAST-IaC.latest.gitlab-ci.yml
@@ -19,6 +24,7 @@ include:
   - local: .gitlab-ci/release/create-tag-pipeline.yml
   - local: .gitlab-ci/release/create-release-files.yml
   - local: .gitlab-ci/release/release.yml
+  - local: .gitlab-ci/build.yml
   - local: .gitlab-ci/stage-test.yml
   - local: .gitlab-ci/stage-staging.yml
   - local: .gitlab-ci/stage-production.yml
