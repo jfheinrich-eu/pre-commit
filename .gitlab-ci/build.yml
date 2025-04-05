@@ -11,7 +11,7 @@ include:
 prepare-build:
   extends:
     - .prepare_psono
-  stage: staging
+  stage: build
   script:
     - 'echo "CI_PSONO_REGISTRY=$(./psonoci -c ./.psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY)" >> variables.env'
     - 'echo "CI_PSONO_REGISTRY_PASSWORD=$(./psonoci -c ./.psonoci.toml env-vars get-or-create ${PSONO_GITLAB_CONTAINER_REGISTRY} CI_REGISTRY_PASSWORD)" >> variables.env'
