@@ -31,7 +31,7 @@ container_scanning:
     - export CS_IMAGE="${CS_PSONO_REGISTRY}/jfheinrich-dev/pre-commit:build"
     - export CS_REGISTRY_USER="${CS_PSONO_REGISTRY_USER}"
     - export CS_REGISTRY_PASSWORD="${CS_PSONO_REGISTRY_PASSWORD}"
-    - echo "$(pwd): $(ls -la)"
+    - echo "$(pwd): $(ls -la Dockerfile)"
 
 include:
   - template: Jobs/Container-Scanning.gitlab-ci.yml
