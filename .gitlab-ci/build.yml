@@ -1,4 +1,8 @@
 container_scanning:
+  needs:
+    - job: prepare-build
+      optional: false
+      artifacts: true
   variables:
     CS_IMAGE: ${CI_PSONO_REGISTRY}/jfheinrich-dev/pre-commit:build
     GIT_STRATEGY: fetch
