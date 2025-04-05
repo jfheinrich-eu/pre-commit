@@ -5,6 +5,11 @@ prepare_scanning:
     - apk add --update curl
     - curl https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci --output psonoci && chmod +x psonoci
     - cp "${PSONO_CONFIG}" .psonoci.toml
+  artifacts:
+    paths:
+      - psonoci
+      - .psonoci.toml
+    expire_in: 1 hour
 
 container_scanning:
   variables:
