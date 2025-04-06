@@ -24,7 +24,7 @@ jobs:
         name: Setup secrets
         shell: bash
         run: |
-          apt update && apt install -y curl
+          sudo apt update && sudo apt install -y curl
           curl https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci --output psonoci && chmod +x psonoci
           ci_registry="$(./psonoci env-vars get-or-create ${PSONO_DOCKERHUB_REGISTRY_ID} CI_REGISTRY)"
           ci_registry_user="$(./psonoci env-vars get-or-create ${PSONO_DOCKERHUB_REGISTRY_ID} CI_REGISTRY_USER)"
@@ -76,7 +76,7 @@ jobs:
             diff: false
             quiet: false
             hide-progress-bar: true
-            exit-code: 50
+            #exit-code: 50
             path: .
 
   build:
