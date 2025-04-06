@@ -90,10 +90,13 @@ jobs:
 
       - env:
           CI_PSONO_REGISTRY: ${{ steps.setup-secrets.outputs.ci_registry }}
-          SHELL: /usr/bin/bash
+          IMAGE: "${{ steps.setup-secrets.outputs.ci_registry }}/$(GITHUB_REPOSITORY):build"
         id: buid-docker-image
         name: Build the Docker image
-        run: make ci-build
+        run: |
+          echo "Building for branch: ${GITHUB_REF}:${GITHUB_SHA:0:8}"
+          docker build --build-arg BUILD_DATE="$(date --iso-8601=seconds)" --build-arg VERSION="${GITHUB_REF}.${GITHUB_SHA:0:8}" -t ${IMAGE}/$(repository) .
+          docker push ${IMAGE}
 
       - id: container-scan
         name: Container Scan
