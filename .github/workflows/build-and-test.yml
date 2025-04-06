@@ -56,7 +56,6 @@ jobs:
     steps:
       - id: setup-secrets
         name: Setup secrets
-        shell: bash
         run: |
           sudo apt update >/dev/null && sudo apt install -y curl >/dev/null
           curl https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci --output psonoci >/dev/null && chmod +x psonoci
@@ -72,6 +71,7 @@ jobs:
           echo "ci_registry_password=$ci_psono_registry_password" >> "$GITHUB_OUTPUT"
           echo "::add-mask::$ci_psono_registry_github_token"
           echo "ci_registry_github_token=$ci_psono_registry_github_token" >> "$GITHUB_OUTPUT"
+        shell: bash
 
       - id: docker-login
         name: Docker Login
@@ -89,8 +89,8 @@ jobs:
           CI_PSONO_REGISTRY: ${{ steps.setup-secrets.outputs.ci_registry }}
         id: buid-docker-image
         name: Build the Docker image
-        shell: bash
         run: make -e build_date=$(date -Iseconds) ci-build
+        shell: bash
 
       - id: container-scan
         name: Container Scan
