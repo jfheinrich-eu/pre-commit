@@ -2,6 +2,9 @@ name: Build, Test Docker image
 
 on:
   push:
+    branches-ignore:
+      - main
+      - develop
 
 jobs:
 
@@ -19,13 +22,6 @@ jobs:
       PSONO_GITHUB_TOKEN_ID: ${{ secrets.PSONO_GITHUB_CLI_TOKEN}}
 
     steps:
-      - name: Dump github context
-        if: false
-        run:   echo "$GITHUB_CONTEXT"
-        shell: bash
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-
       - id: setup-secrets
         name: Setup secrets
         run: |

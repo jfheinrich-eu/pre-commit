@@ -27,6 +27,7 @@ COPY .pre-commit-config.yaml /root/.pre-commit-config.yaml
 COPY entrypoint.sh /usr/bin/entrypoint.sh
 
 RUN apk add --update --no-cache \
+    'xz-libs>=5.6.3-r1' \
     git --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
     php83 php83-pecl-xdebug --repository=https://dl-cdn.alpinelinux.org/alpine/v3.21/community && \
     pip install pre-commit
