@@ -93,7 +93,7 @@ jobs:
           SHELL: /usr/bin/bash
         id: buid-docker-image
         name: Build the Docker image
-        run: make -e build_date=$(date -Iseconds) ci-build
+        run: make ci-build
 
       - id: container-scan
         name: Container Scan
