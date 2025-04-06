@@ -5,47 +5,6 @@ on:
 
 jobs:
 
-  sast:
-    runs-on: ubuntu-latest
-    if: false
-    steps:
-      - uses: actions/checkout@v4
-      - id: sast
-        name: Bearer Action
-        # You may pin to the exact commit or the version.
-        # uses: Bearer/bearer-action@828eeb928ce2f4a7ca5ed57fb8b59508cb8c79bc
-        uses: Bearer/bearer-action@v2
-        with:
-            # Specify the Bearer version to use. This must match a Bearer release name.
-            version: # optional, default is
-            # Specify the comma separated scanners e.g. --scanner secrets,sast
-            # scanner: # optional, default is
-            # configuration file path
-            # config-file: # optional, default is
-            # bearer.ignore file path
-            # bearer-ignore-file: # optional, default is
-            # Specify the comma-separated ids of the rules you would like to run. Skips all other rules.
-            # only-rule: # optional, default is
-            # Specify the comma-separated ids of the rules you would like to skip. Runs all other rules.
-            # skip-rule: # optional, default is
-            # Specify the comma separated files and directories to skip. Supports * syntax, e.g. --skip-path users/*.go,users/admin.sql
-            # skip-path: # optional, default is
-            # Specify the comma-separated fingerprints of the findings you would like to exclude from the report.
-            # exclude-fingerprint: # optional, default is
-            # Specify which severities are included in the report as a comma separated string
-            # severity: # optional, default is
-            # Specify which format to use for the report (json, yaml, sarif, gitlab-sast)
-            # format: # optional, default is
-            # Specify where to store the report
-            # output: # optional, default is
-            # For use with Bearer Cloud
-            # api-key: # optional, default is
-            diff: false
-            quiet: false
-            hide-progress-bar: true
-            #exit-code: 50
-            path: .
-
   build:
     runs-on: ubuntu-latest
     defaults:
@@ -58,7 +17,15 @@ jobs:
       PSONO_DOCKERHUB_REGISTRY_ID: ${{ secrets.PSONO_DOCKERHUB_REGISTRY_ID }}
       PSONO_GITHUB_REGISTRY_ID: ${{ secrets.PSONO_GITHUB_REGISTRY_ID }}
       PSONO_GITHUB_TOKEN_ID: ${{ secrets.PSONO_GITHUB_CLI_TOKEN}}
+
     steps:
+      - name: Dump github context
+        if: false
+        run:   echo "$GITHUB_CONTEXT"
+        shell: bash
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+
       - id: setup-secrets
         name: Setup secrets
         run: |
@@ -76,12 +43,11 @@ jobs:
           echo "ci_registry_password=$ci_psono_registry_password" >> "$GITHUB_OUTPUT"
           echo "::add-mask::$ci_psono_registry_github_token"
           echo "ci_registry_github_token=$ci_psono_registry_github_token" >> "$GITHUB_OUTPUT"
+          echo "cs_image=${ci_registry}/${GITHUB_REPOSITORY}:build" >> "$GITHUB_OUTPUT"
+          echo "build_date=$(date --iso-8601=seconds)" >> "$GITHUB_OUTPUT"
+          echo "build_version=${GITHUB_REF}.${GITHUB_SHA:0:8}" >> "$GITHUB_OUTPUT"
 
-      - name: Dump github context
-        run:   echo "$GITHUB_CONTEXT"
-        shell: bash
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
+      - uses: actions/checkout@v4
 
       - id: docker-login
         name: Docker Login
@@ -93,35 +59,34 @@ jobs:
             ecr: auto
             logout: true
 
-      - uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
-      - env:
-          CI_PSONO_REGISTRY: ${{ steps.setup-secrets.outputs.ci_registry }}
-          CI_REGISTRY: ${{ steps.setup-secrets.outputs.ci_registry }}
-        id: buid-docker-image
-        name: Build the Docker image
-        run: |
-          IMAGE="${CI_REGISTRY}/${GITHUB_REPOSITORY}:build"
-          echo "Building for branch: ${GITHUB_REF_NAME}:${GITHUB_SHA:0:8}"
-          docker build --build-arg BUILD_DATE="$(date --iso-8601=seconds)" --build-arg VERSION="${GITHUB_REF}.${GITHUB_SHA:0:8}" -t ${IMAGE} .
-          docker push ${IMAGE}
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@v3
 
-      - id: container-scan
-        name: Container Scan
-        uses: crazy-max/ghaction-container-scan@v3.1.0
+      - name: Build and load
+        uses: docker/build-push-action@v4
         with:
-            trivy_version: latest
-            # Container image to scan (eg. alpine:3.7)
-            image: "${{ steps.setup-secrets.outputs.ci_registry }}/${GITHUB_REPOSITORY}:build"
-            # Container image tarball path to scan
-            # tarball: # optional
-            # Dockerfile required to generate a sarif report
-            dockerfile: ./Dockerfile
-            # Report vulnerabilities of provided level or higher (default: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL)
-            severity: LOW
-            # Defines threshold for severity
-            # severity_threshold: # optional
-            ignore_unfixed: false
-            annotations: false
-            # GitHub Token as provided by secrets
-            github_token: ${{ steps.setup-secrets.outputs.ci_registry_github_token }}
+          context: .
+          platforms: linux/amd64
+          load: true
+          tags: ${{ steps.setup-secrets.outputs.cs_image }}
+          build-args: (BUILD_DATE=${{ steps.setup-secrets.outputs.build_date }}, VERSION=${{ steps.setup-secrets.outputs.build_version }})
+
+      - name: Scan for vulnerabilities
+        id: scan
+        uses: crazy-max/ghaction-container-scan@v3
+        with:
+          image: ${{ steps.setup-secrets.outputs.cs_image }}
+          dockerfile: ./Dockerfile
+          github_token: ${{ steps.setup-secrets.outputs.ci_registry_github_token }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          platforms: inux/arm64,linux/amd64,linux/amd64/v2,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/mips64le,linux/arm/v7,linux/arm/v6
+          push: true
+          tags: ${{ steps.setup-secrets.outputs.cs_image }}
+          build-args: (BUILD_DATE=${{ steps.setup-secrets.outputs.build_date }}, VERSION=${{ steps.setup-secrets.outputs.build_version }})
