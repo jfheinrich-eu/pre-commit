@@ -47,6 +47,9 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
     env:
       PSONO_CI_API_KEY_ID: ${{ secrets.PSONO_API_KEY_ID }}
       PSONO_CI_API_SECRET_KEY_HEX: ${{ secrets.PSONO_API_SECRET_KEY_HEX }}
@@ -71,7 +74,6 @@ jobs:
           echo "ci_registry_password=$ci_psono_registry_password" >> "$GITHUB_OUTPUT"
           echo "::add-mask::$ci_psono_registry_github_token"
           echo "ci_registry_github_token=$ci_psono_registry_github_token" >> "$GITHUB_OUTPUT"
-        shell: bash
 
       - id: docker-login
         name: Docker Login
@@ -90,7 +92,6 @@ jobs:
         id: buid-docker-image
         name: Build the Docker image
         run: make -e build_date=$(date -Iseconds) ci-build
-        shell: bash
 
       - id: container-scan
         name: Container Scan
