@@ -43,9 +43,9 @@ jobs:
           echo "ci_registry_password=$ci_psono_registry_password" >> "$GITHUB_OUTPUT"
           echo "::add-mask::$ci_psono_registry_github_token"
           echo "ci_registry_github_token=$ci_psono_registry_github_token" >> "$GITHUB_OUTPUT"
-          echo "cs_image=${ci_registry}/${GITHUB_REPOSITORY}:build" >> "$GITHUB_OUTPUT"
+          echo "cs_image=${ci_psono_registry}/${GITHUB_REPOSITORY}:build" >> "$GITHUB_OUTPUT"
           echo "build_date=$(date --iso-8601=seconds)" >> "$GITHUB_OUTPUT"
-          echo "build_version=${GITHUB_REF}.${GITHUB_SHA:0:8}" >> "$GITHUB_OUTPUT"
+          echo "build_version=${GITHUB_REF_NAME}.${GITHUB_SHA:0:8}" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@v4
 
