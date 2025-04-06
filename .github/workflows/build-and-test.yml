@@ -89,6 +89,7 @@ jobs:
 
       - env:
           CI_PSONO_REGISTRY: ${{ steps.setup-secrets.outputs.ci_registry }}
+          SHELL: /usr/bin/bash
         id: buid-docker-image
         name: Build the Docker image
         run: make -e build_date=$(date -Iseconds) ci-build
