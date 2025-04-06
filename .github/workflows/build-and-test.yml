@@ -26,18 +26,18 @@ jobs:
         run: |
           sudo apt update >/dev/null && sudo apt install -y curl >/dev/null
           curl https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci --output psonoci >/dev/null && chmod +x psonoci
-          ci_registry="$(./psonoci env-vars get-or-create ${PSONO_DOCKERHUB_REGISTRY_ID} CI_REGISTRY)"
-          ci_registry_user="$(./psonoci env-vars get-or-create ${PSONO_DOCKERHUB_REGISTRY_ID} CI_REGISTRY_USER)"
-          ci_registry_password="$(./psonoci env-vars get-or-create ${PSONO_DOCKERHUB_REGISTRY_ID} CI_REGISTRY_PASSWORD)"
-          ci_registry_github_token="$(./psonoci secret get ${PSONO_GITHUB_REGISTRY_ID} password)"
-          echo "::add-mask::$ci_registry"
-          echo "::add-mask::$ci_registry_user"
-          echo "::add-mask::$ci_registry_password"
-          echo "::add-mask::$ci_registry_github_token"
-          echo "ci_registry=$ci_registry" >> "$GITHUB_OUTPUT"
-          echo "ci_registry_user=$ci_registry_user" >> "$GITHUB_OUTPUT"
-          echo "ci_registry_password=$ci_registry_password" >> "$GITHUB_OUTPUT"
-          echo "ci_registry_github_token=$ci_registry_github_token" >> "$GITHUB_OUTPUT"
+          ci_psono_registry="$(./psonoci env-vars get-or-create ${PSONO_DOCKERHUB_REGISTRY_ID} CI_REGISTRY)"
+          ci_psono_registry_user="$(./psonoci env-vars get-or-create ${PSONO_DOCKERHUB_REGISTRY_ID} CI_REGISTRY_USER)"
+          ci_psono_registry_password="$(./psonoci env-vars get-or-create ${PSONO_DOCKERHUB_REGISTRY_ID} CI_REGISTRY_PASSWORD)"
+          ci_psono_registry_github_token="$(./psonoci secret get ${PSONO_GITHUB_REGISTRY_ID} password)"
+          echo "::add-mask::$ci_psono_registry"
+          echo "::add-mask::$ci_psono_registry_user"
+          echo "::add-mask::$ci_psono_registry_password"
+          echo "::add-mask::$ci_psono_registry_github_token"
+          echo "ci_registry=$ci_psono_registry" >> "$GITHUB_OUTPUT"
+          echo "ci_registry_user=$ci_psono_registry_user" >> "$GITHUB_OUTPUT"
+          echo "ci_registry_password=$ci_psono_registry_password" >> "$GITHUB_OUTPUT"
+          echo "ci_registry_github_token=$ci_psono_registry_github_token" >> "$GITHUB_OUTPUT"
 
   sast:
     runs-on: ubuntu-latest
