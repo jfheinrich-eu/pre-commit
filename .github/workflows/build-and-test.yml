@@ -5,40 +5,6 @@ on:
 
 jobs:
 
-  secret-generator:
-    runs-on: ubuntu-latest
-    outputs:
-        ci_registry: ${{ steps.setup-secrets.outputs.ci_registry }}
-        ci_registry_user: ${{ steps.setup-secrets.outputs.ci_registry_user }}
-        ci_registry_password: ${{ steps.setup-secrets.outputs.ci_registry_password }}
-        ci_registry_github_token: ${{ steps.setup-secrets.outputs.ci_registry_github_token }}
-    env:
-      PSONO_CI_API_KEY_ID: ${{ secrets.PSONO_API_KEY_ID }}
-      PSONO_CI_API_SECRET_KEY_HEX: ${{ secrets.PSONO_API_SECRET_KEY_HEX }}
-      PSONO_CI_SERVER_URL: ${{ secrets.PSONO_SERVER_URL }}
-      PSONO_DOCKERHUB_REGISTRY_ID: ${{ secrets.PSONO_DOCKERHUB_REGISTRY_ID }}
-      PSONO_GITHUB_REGISTRY_ID: ${{ secrets.PSONO_GITHUB_REGISTRY_ID }}
-
-    steps:
-      - id: setup-secrets
-        name: Setup secrets
-        shell: bash
-        run: |
-          sudo apt update >/dev/null && sudo apt install -y curl >/dev/null
-          curl https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci --output psonoci >/dev/null && chmod +x psonoci
-          ci_psono_registry="$(./psonoci env-vars get-or-create ${PSONO_DOCKERHUB_REGISTRY_ID} CI_REGISTRY)"
-          ci_psono_registry_user="$(./psonoci env-vars get-or-create ${PSONO_DOCKERHUB_REGISTRY_ID} CI_REGISTRY_USER)"
-          ci_psono_registry_password="$(./psonoci env-vars get-or-create ${PSONO_DOCKERHUB_REGISTRY_ID} CI_REGISTRY_PASSWORD)"
-          ci_psono_registry_github_token="$(./psonoci secret get ${PSONO_GITHUB_REGISTRY_ID} password)"
-          #echo "::add-mask::$ci_psono_registry"
-          #echo "::add-mask::$ci_psono_registry_user"
-          #echo "::add-mask::$ci_psono_registry_password"
-          #echo "::add-mask::$ci_psono_registry_github_token"
-          echo "ci_registry=$ci_psono_registry" >> "$GITHUB_OUTPUT"
-          echo "ci_registry_user=$ci_psono_registry_user" >> "$GITHUB_OUTPUT"
-          echo "ci_registry_password=$ci_psono_registry_password" >> "$GITHUB_OUTPUT"
-          echo "ci_registry_github_token=$ci_psono_registry_github_token" >> "$GITHUB_OUTPUT"
-
   sast:
     runs-on: ubuntu-latest
     steps:
@@ -81,38 +47,58 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    needs: secret-generator
+    env:
+      PSONO_CI_API_KEY_ID: ${{ secrets.PSONO_API_KEY_ID }}
+      PSONO_CI_API_SECRET_KEY_HEX: ${{ secrets.PSONO_API_SECRET_KEY_HEX }}
+      PSONO_CI_SERVER_URL: ${{ secrets.PSONO_SERVER_URL }}
+      PSONO_DOCKERHUB_REGISTRY_ID: ${{ secrets.PSONO_DOCKERHUB_REGISTRY_ID }}
+      PSONO_GITHUB_REGISTRY_ID: ${{ secrets.PSONO_GITHUB_REGISTRY_ID }}
     steps:
-      - env:
-          CI_REGISTRY: ${{ needs.secret-generator.outputs.ci_registry }}
-          CI_REGISTRY_USER: ${{ needs.secret-generator.outputs.ci_registry_user }}
-          CI_REGISTRY_PASSWORD: ${{ needs.secret-generator.outputs.ci_registry_password }}
+      - id: setup-secrets
+        name: Setup secrets
+        shell: bash
+        run: |
+          sudo apt update >/dev/null && sudo apt install -y curl >/dev/null
+          curl https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci --output psonoci >/dev/null && chmod +x psonoci
+          ci_psono_registry="$(./psonoci env-vars get-or-create ${PSONO_DOCKERHUB_REGISTRY_ID} CI_REGISTRY)"
+          ci_psono_registry_user="$(./psonoci env-vars get-or-create ${PSONO_DOCKERHUB_REGISTRY_ID} CI_REGISTRY_USER)"
+          ci_psono_registry_password="$(./psonoci env-vars get-or-create ${PSONO_DOCKERHUB_REGISTRY_ID} CI_REGISTRY_PASSWORD)"
+          ci_psono_registry_github_token="$(./psonoci secret get ${PSONO_GITHUB_REGISTRY_ID} password)"
+          echo "::add-mask::$ci_psono_registry"
+          echo "ci_registry=$ci_psono_registry" >> "$GITHUB_OUTPUT"
+          echo "::add-mask::$ci_psono_registry_user"
+          echo "ci_registry_user=$ci_psono_registry_user" >> "$GITHUB_OUTPUT"
+          echo "::add-mask::$ci_psono_registry_password"
+          echo "ci_registry_password=$ci_psono_registry_password" >> "$GITHUB_OUTPUT"
+          echo "::add-mask::$ci_psono_registry_github_token"
+          echo "ci_registry_github_token=$ci_psono_registry_github_token" >> "$GITHUB_OUTPUT"
+
+      - id: docker-login
         name: Docker Login
         uses: docker/login-action@v3.4.0
         with:
-            registry: $CI_REGISTRY
-            username: $CI_REGISTRY_USER
-            password: $CI_REGISTRY_PASSWORD
+            registry: ${{ steps.setup-secrets.outputs.ci_registry }}
+            username: ${{ steps.setup-secrets.outputs.ci_registry_user }}
+            password: ${{ steps.setup-secrets.outputs.ci_registry_password }}
             ecr: auto
             logout: true
 
       - uses: actions/checkout@v4
 
       - env:
-          CI_PSONO_REGISTRY: ${{ needs.secret-generator.outputs.ci_registry }}
+          CI_PSONO_REGISTRY: ${{ steps.setup-secrets.outputs.ci_registry }}
+        id: buid-docker-image
         name: Build the Docker image
         shell: bash
         run: make -e build_date=$(date -Iseconds) ci-build
 
-      - env:
-          CS_IMAGE: "${{ needs.secret-generator.outputs.ci_registry }}/$(GITHUB_REPOSITORY):build"
-          CS_GITHUB_TOKEN: ${{ needs.secret-generator.outputs.ci_registry_github_token }}
+      - id: container-scan
         name: Container Scan
         uses: crazy-max/ghaction-container-scan@v3.1.0
         with:
             trivy_version: latest
             # Container image to scan (eg. alpine:3.7)
-            image: $CS_IMAGE
+            image: "${{ steps.setup-secrets.outputs.ci_registry }}/$(GITHUB_REPOSITORY):build"
             # Container image tarball path to scan
             # tarball: # optional
             # Dockerfile required to generate a sarif report
@@ -124,4 +110,4 @@ jobs:
             ignore_unfixed: false
             annotations: false
             # GitHub Token as provided by secrets
-            github_token: $CS_GITHUB_TOKEN
+            github_token: ${{ steps.setup-secrets.outputs.ci_registry_github_token }}
