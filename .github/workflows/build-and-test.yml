@@ -76,6 +76,12 @@ jobs:
           echo "::add-mask::$ci_psono_registry_github_token"
           echo "ci_registry_github_token=$ci_psono_registry_github_token" >> "$GITHUB_OUTPUT"
 
+      - name: Dump github context
+        run:   echo "$GITHUB_CONTEXT"
+        shell: bash
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+
       - id: docker-login
         name: Docker Login
         uses: docker/login-action@v3.4.0
