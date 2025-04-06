@@ -90,12 +90,12 @@ jobs:
 
       - env:
           CI_PSONO_REGISTRY: ${{ steps.setup-secrets.outputs.ci_registry }}
-          IMAGE: "${{ steps.setup-secrets.outputs.ci_registry }}/$(GITHUB_REPOSITORY):build"
+          IMAGE: "${{ steps.setup-secrets.outputs.ci_registry }}/${GITHUB_REPOSITORY}:build"
         id: buid-docker-image
         name: Build the Docker image
         run: |
           echo "Building for branch: ${GITHUB_REF}:${GITHUB_SHA:0:8}"
-          docker build --build-arg BUILD_DATE="$(date --iso-8601=seconds)" --build-arg VERSION="${GITHUB_REF}.${GITHUB_SHA:0:8}" -t ${IMAGE}/$(repository) .
+          docker build --build-arg BUILD_DATE="$(date --iso-8601=seconds)" --build-arg VERSION="${GITHUB_REF}.${GITHUB_SHA:0:8}" -t ${IMAGE} .
           docker push ${IMAGE}
 
       - id: container-scan
@@ -104,7 +104,7 @@ jobs:
         with:
             trivy_version: latest
             # Container image to scan (eg. alpine:3.7)
-            image: "${{ steps.setup-secrets.outputs.ci_registry }}/$(GITHUB_REPOSITORY):build"
+            image: "${{ steps.setup-secrets.outputs.ci_registry }}/${GITHUB_REPOSITORY}:build"
             # Container image tarball path to scan
             # tarball: # optional
             # Dockerfile required to generate a sarif report
