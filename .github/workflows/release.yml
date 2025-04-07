@@ -1,4 +1,4 @@
-name: Main CI
+name: Release
 
 on:
   push:
@@ -40,7 +40,7 @@ jobs:
           major-label: major release
           minor-label: minor release
           patch-label: patch release
-          noop-labels: documentation, change
+          noop-labels: documentation, change, develop
           require-release-notes: true
           release-notes-prefix: ''
           release-notes-suffix: ''

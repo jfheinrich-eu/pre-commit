@@ -55,10 +55,12 @@ jobs:
             ecr: auto
             logout: true
 
-      # - name: Set up QEMU
-      #   uses: docker/setup-qemu-action@v3
+      - name: Set up QEMU
+        id: setup-qemu
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker buildx
+        id: seup-docker-buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Build and load
@@ -88,7 +90,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          platforms: linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/386
+          platforms: ${{ steps.seup-docker-buildx.outputs.platforms }}, ${{ steps.setup-qemu.outputs.platforms }}
           push: true
           tags: ${{ steps.setup-secrets.outputs.cs_image }}
           build-args: (BUILD_DATE=${{ steps.setup-secrets.outputs.build_date }}, VERSION=${{ steps.setup-secrets.outputs.build_version }})
