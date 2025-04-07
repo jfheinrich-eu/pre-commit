@@ -1,4 +1,6 @@
 .gitlab-ci/
+.github/
+.gh-audit-output/
 .vscode/
 jfheinrich/
 .git/
@@ -10,3 +12,4 @@ GitVersion.yml
 LICENSE
 Makefile
 *.md
+.env.local
