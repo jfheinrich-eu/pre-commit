@@ -87,7 +87,7 @@ jobs:
         with:
           context: .
           # depends on the base image python: 3-alpine3.21
-          platforms: linux/386, linux/amd64, lijnux/arm/v6
+          platforms: linux/386, linux/amd64, linux/arm/v6
           push: true
           tags: ${{ steps.setup-secrets.outputs.cs_image }}
           build-args: (BUILD_DATE=${{ steps.setup-secrets.outputs.build_date }}, VERSION=${{ steps.setup-secrets.outputs.build_version }})
