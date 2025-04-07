@@ -90,7 +90,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          platforms: ${{ steps.seup-docker-buildx.outputs.platforms }}, ${{ steps.setup-qemu.outputs.platforms }}
+          platforms: ${{ steps.seup-docker-buildx.outputs.platforms }}
           push: true
           tags: ${{ steps.setup-secrets.outputs.cs_image }}
           build-args: (BUILD_DATE=${{ steps.setup-secrets.outputs.build_date }}, VERSION=${{ steps.setup-secrets.outputs.build_version }})
