@@ -1,4 +1,5 @@
 stages:
+  - build
   - test
   - staging
   - release
@@ -19,6 +20,11 @@ include:
   - local: .gitlab-ci/release/create-tag-pipeline.yml
   - local: .gitlab-ci/release/create-release-files.yml
   - local: .gitlab-ci/release/release.yml
+  - local: .gitlab-ci/container-scanning.yml
+    rules:
+      - if: $CI_COMMIT_BRANCH
+      - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+  - local: .gitlab-ci/build.yml
   - local: .gitlab-ci/stage-test.yml
   - local: .gitlab-ci/stage-staging.yml
   - local: .gitlab-ci/stage-production.yml

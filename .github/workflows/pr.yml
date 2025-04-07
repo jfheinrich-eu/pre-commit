@@ -1,0 +1,47 @@
+name: Release Info
+
+on:
+  pull_request:
+    types: [labeled, unlabeled, opened, edited, reopened, synchronize, ready_for_review]
+
+jobs:
+  check-pr:
+    name: Validate Release Label and Notes
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    env:
+      PSONO_CI_API_KEY_ID: ${{ secrets.PSONO_API_KEY_ID }}
+      PSONO_CI_API_SECRET_KEY_HEX: ${{ secrets.PSONO_API_SECRET_KEY_HEX }}
+      PSONO_CI_SERVER_URL: ${{ secrets.PSONO_SERVER_URL }}
+      PSONO_DOCKERHUB_REGISTRY_ID: ${{ secrets.PSONO_DOCKERHUB_REGISTRY_ID }}
+      PSONO_GITHUB_REGISTRY_ID: ${{ secrets.PSONO_GITHUB_REGISTRY_ID }}
+      PSONO_GITHUB_TOKEN_ID: ${{ secrets.PSONO_GITHUB_CLI_TOKEN}}
+
+    steps:
+      - id: setup-secrets
+        name: Setup secrets
+        run: |
+          sudo apt update >/dev/null && sudo apt install -y curl >/dev/null
+          curl https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci --output psonoci >/dev/null && chmod +x psonoci
+          ci_psono_registry_github_token="$(./psonoci secret get ${PSONO_GITHUB_TOKEN_ID} password)"
+          echo "::add-mask::$ci_psono_registry_github_token"
+          echo "ci_registry_github_token=$ci_psono_registry_github_token" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v2
+
+      - uses: jefflinse/pr-semver-bump@v1.6.0
+        name: Validate Pull Request Metadata
+        with:
+          mode: validate
+          repo-token: ${{ steps.setup-secrets.outputs.ci_registry_github_token }}
+          major-label: major release
+          minor-label: minor release
+          patch-label: patch release
+          noop-labels: documentation, change
+          require-release-notes: true
+          release-notes-prefix: ''
+          release-notes-suffix: ''
+          with-v: false
+          base-branch: false
