@@ -3,3 +3,4 @@ jfheinrich/
 .gitlab-ci-wip.yml
 release_notes.md
 .psonoci.toml
+.env.local
