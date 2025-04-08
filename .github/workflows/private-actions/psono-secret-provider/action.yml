@@ -33,32 +33,13 @@ outputs:
     description: 'Each secret is available as an individual output'
 
 runs:
-  using: 'composite'
-  steps:
-    - name: Fetch secrets from PSONO
-      shell: bash
-      run: |
-        if [ -n "$(which curl)" ]; then
-          curl https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci --output $psonoci >/dev/null
-          chmod +x $psonoci
-        elif [ -n "$(which wget)" ]; then
-          wget --output-document $psonoci https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci >/dev/null
-          chmod +x $psonoci
-        else
-          echo "Neither curl nor WGET found. Cancled"
-          exit 1
-        fi
-        if [ -x $psonoci ]; then
-          ${{ github.action_path }}/fetch_secrets.sh
-        else
-          ls -la ${{ github.action_path }}
-        fi
-      env:
-        psonoci: ${{ github.action_path }}/psonoci
-        PSONO_CI_API_KEY_ID: ${{ inputs.ci_api_key_id }}
-        PSONO_CI_API_SECRET_KEY_HEX: ${{ inputs.ci_api_secret_key_hex }}
-        PSONO_CI_SERVER_URL: ${{ inputs.ci_server_url }}
-        SECRET_TYPE: ${{ inputs.secret_type }}
-        SECRET_ID: ${{ inputs.secret_id }}
-        SECRET_FIELDS: ${{ inputs.secret_fields }}
-        MASK_SECRETS: ${{ inputs.mask_secrets }}
+  using: 'docker'
+  image: 'Dockerfile'
+    env:
+      PSONO_CI_API_KEY_ID: ${{ inputs.ci_api_key_id }}
+      PSONO_CI_API_SECRET_KEY_HEX: ${{ inputs.ci_api_secret_key_hex }}
+      PSONO_CI_SERVER_URL: ${{ inputs.ci_server_url }}
+      SECRET_TYPE: ${{ inputs.secret_type }}
+      SECRET_ID: ${{ inputs.secret_id }}
+      SECRET_FIELDS: ${{ inputs.secret_fields }}
+      MASK_SECRETS: ${{ inputs.mask_secrets }}

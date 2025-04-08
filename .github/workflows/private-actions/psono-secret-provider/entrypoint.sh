@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-$PROG=$psonoci
+$PROG=$(which psonoci)
 
 case "$SECRET_TYPE" in
 env)
