@@ -2,38 +2,46 @@
 set -e
 
 PROG=$(which psonoci)
-PSONO_CI_API_KEY_ID="$1"
-PSONO_CI_API_SECRET_KEY_HEX="$2"
-PSONO_CI_SERVER_URL="$3"
-SECRET_TYPE="$4"
-SECRET_FIELDS="$5"
-MASK_SECRETS="$6"
+PSONO_CI_API_KEY_ID="$INPUT_CI_API_KEY_ID"
+PSONO_CI_API_SECRET_KEY_HEX="$INPUT_CI_API_SECRET_KEY_HEX"
+PSONO_CI_SERVER_URL="$INPUT_CI_SERVER_URL"
+SECRET_TYPE="$INPUT_SECRET_TYPE"
+SECRET_FIELDS=()
+MASK_SECRETS=()
 
-echo "ci_server_url: $INPUT_CI_SERVER_URL"
+if [ -n "$INPUT_SECRET_FIELDS" ]; then
+    IFS=, read line <<<$INPUT_SECRET_FIELDS
+    SECRET_FIELDS=($line)
+fi
+
+if [ -n "$INPUT_MASK_SECRETS" ]; then
+    IFS=, read line <<<$INPUT_MASK_SECRETS
+    MASK_SECRETS=($line)
+fi
 
 case "$SECRET_TYPE" in
 env)
     command="env-vars get-or-create"
-    break
     ;;
 secret)
     command="secret get"
-    break
+    ;;
+*)
+    echo "Unknown SECRET_TYPE: $SECRET_TYPE"
+    exit 1
     ;;
 esac
 
-for f in $(echo $SECRET_FIELDS |  tr ',' ' '); do
+for f in ${SECRET_FIELDS[*]}; do
     SECRET_VALUE_NAME=$f
 
     $fetched_secret_name="${SECRET_VALUE_NAME}_fetched"
 
-    ORG_IFS=${IFS}
     IFS= read -r -d '' "$fetched_secret_name" <<<"$(${PROG} ${command} ${SECRET_ID} {SECRET_VALUE_NAME})"
-    IFS=${ORG_IFS}
 
-    for m in $(echo $MASK_SECRET | tr ',' ' '); do
+    for m in ${MASK_SECRETs[*]}; do
         if [ "$m" == "$SECRET_VALUE_NAME" ]; then
-            echo "::add-mask::${fetched_seceret_name}"
+            echo "::add-mask::${fetched_secret_name}"
         fi
     done
 
