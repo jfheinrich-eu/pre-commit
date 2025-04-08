@@ -9,12 +9,12 @@ SECRET_TYPE="$INPUT_SECRET_TYPE"
 SECRET_FIELDS=()
 MASK_SECRETS=()
 
-if [ -n "$INPUT_SECRET_FIELDS" ]; then
+if [ "x$INPUT_SECRET_FIELDS" != "x" ]; then
     IFS=, read line <<<$INPUT_SECRET_FIELDS
     SECRET_FIELDS=($line)
 fi
 
-if [ -n "$INPUT_MASK_SECRETS" ]; then
+if [ "$INPUT_MASK_SECRETS" != "x" ]; then
     IFS=, read line <<<$INPUT_MASK_SECRETS
     MASK_SECRETS=($line)
 fi
@@ -39,7 +39,7 @@ for f in ${SECRET_FIELDS[*]}; do
 
     IFS= read -r -d '' "$fetched_secret_name" <<<"$(${PROG} ${command} ${SECRET_ID} {SECRET_VALUE_NAME})"
 
-    for m in ${MASK_SECRETs[*]}; do
+    for m in ${MASK_SECRETS[*]}; do
         if [ "$m" == "$SECRET_VALUE_NAME" ]; then
             echo "::add-mask::${fetched_secret_name}"
         fi
