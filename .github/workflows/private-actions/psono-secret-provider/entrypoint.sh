@@ -35,7 +35,7 @@ for f in "${SECRET_FIELDS[@]}"; do
 
     fetched_secret_name="${SECRET_VALUE_NAME}_fetched"
 
-    IFS= read -r -d '' "$fetched_secret_name" <<<"$(${PROG} ${command} ${SECRET_ID} {SECRET_VALUE_NAME})"
+    IFS= read -r -d '' "$fetched_secret_name" <<<"$(${PROG} ${command} ${SECRET_ID} ${SECRET_VALUE_NAME})"
 
     for m in "${MASK_SECRETS[@]}"; do
         if [ "$m" == "$SECRET_VALUE_NAME" ]; then
