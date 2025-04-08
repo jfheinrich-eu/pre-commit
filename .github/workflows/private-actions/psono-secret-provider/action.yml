@@ -35,40 +35,20 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - name: Install psonocli
-      id: install-psonoci
+    - name: Fetch secrets from PSONO
       shell: bash
-      env:
-        psonoci: ${{ github.action_path }}/psonoci
       run: |
-        if [ -n "$(which curl)" ]
-        then
-          mkdir ~/psono
+        if [ -n "$(which curl)" ]; then
           curl https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci --output $psonoci >/dev/null
           chmod +x $psonoci
-        elif [ -n "$(which wget)" ]
-        then
-          mkdir ~/psono
+        elif [ -n "$(which wget)" ]; then
           wget --output-document $psonoci https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci >/dev/null
           chmod +x $psonoci
         else
           echo "Neither curl nor WGET found. Cancled"
           exit 1
         fi
-
-    - name: Cache Psosnoci
-      uses: actions/cache@v4
-      with:
-        path: ${{ github.action_path }}
-        key: psono-${{ runner.os }}-${{ hashfiles('**/psonoci') }}
-        restore-keys: |
-          psono-${{ runner.os }}-
-
-    - name: Fetch secrets from PSONO
-      shell: bash
-      run: |
-        if [ -x $psono ]
-        then
+        if [ -x $psono ]; then
           ${{ github.action_path }}/fetch_secrets.sh
         else
           ls -la ${{ github.action_path }}
