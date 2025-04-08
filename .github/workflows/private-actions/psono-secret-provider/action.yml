@@ -34,13 +34,22 @@ outputs:
 
 runs:
   using: 'composite'
-  runs_on: ubuntu-latest
   steps:
     - name: Install psonocli
       shell: bash
       run: |
-        curl https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci --output ${{ github.action_path }}/psonoci >/dev/null
-        chmod +x ${{ github.action_path }}/psonoci
+        if [ -n "$(which curl)" ]
+        then
+          curl https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci --output ${{ github.action_path }}/psonoci >/dev/null
+          chmod +x ${{ github.action_path }}/psonoci
+        elif [ -n "$(which wget)" ]
+        then
+          wget --output-document ${{ github.action_path }}/psonoci https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci >/dev/null
+          chmod +x ${{ github.action_path }}/psonoci
+        else
+          echo "Neither curl nor WGET found. Cancled"
+          exit 1
+        fi
 
     - name: Fetch secrets from PSONO
       shell: bash
