@@ -38,8 +38,9 @@ runs:
     - name: Install psonocli
       id: install-psonoci
       shell: bash
+      env:
+        psonoci: ${{ github.action_path }}/psonoci
       run: |
-        psonoci="~/psono/psonoci"
         if [ -n "$(which curl)" ]
         then
           mkdir ~/psono
@@ -58,20 +59,21 @@ runs:
     - name: Cache Psosnoci
       uses: actions/cache@v4
       with:
-        path: ~/psono
+        path: ${{ github.action_path }}
         key: psono-${{ runner.os }}-${{ hashfiles('**/psonoci') }}
         restore-keys: |
           psono-${{ runner.os }}-
 
     - name: Fetch secrets from PSONO
       shell: bash
+      env:
+        psonoci: ${{ github.action_path }}/psonoci
       run: |
-        if [ -x ~/psono/psonoci ]
+        if [ -x $psono ]
         then
           ${{ github.action_path }}/fetch_secrets.sh
         else
           ls -la ${{ github.action_path }}
-          ls -l ~/psono
         fi
       env:
         PSONO_CI_API_KEY_ID: ${{ inputs.ci_api_key_id }}
