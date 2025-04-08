@@ -8,6 +8,29 @@ on:
 
 jobs:
 
+  test-action:
+    runs-on: ubunto-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Fetch secrets from PSONO
+        id: psono-secrets
+        uses: ./private-actions/psono-secret-provider
+        with:
+            ci_api_key_id: ${{ secrets.CI_API_KEY_ID }}
+            ci_api_key_secret_hex: ${{ secrets.CI_API_KEY_SECRET_HEX }}
+            ci_server_url: ${{ secrets.PSONO_SERVER_URL }}
+            secret_id: ${{ secrets.PSONO_GITHUB_CLI_TOKEN}}
+            secret_fields: 'username,password'
+            mask_secrets: 'password'
+
+      # Access secrets
+      - name: Use secrets
+        run: |
+          echo "Username: ${{ steps.psono-secrets.outputs.username }}"
+          echo "password: ${{ steps.psono-secrets.outputs.password }}"
+
   build:
     runs-on: ubuntu-latest
     defaults:
@@ -62,7 +85,7 @@ jobs:
       - name: Build and load
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: ./src
           platforms: linux/amd64
           load: true
           tags: ${{ steps.setup-secrets.outputs.cs_image }}
@@ -73,7 +96,7 @@ jobs:
         uses: crazy-max/ghaction-container-scan@v3
         with:
           image: ${{ steps.setup-secrets.outputs.cs_image }}
-          dockerfile: ./Dockerfile
+          dockerfile: ./src/Dockerfile
           github_token: ${{ steps.setup-secrets.outputs.ci_registry_github_token }}
 
       - name: Upload SARIF file
@@ -85,7 +108,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: ./src
           # depends on the base image python: 3-alpine3.21
           platforms: linux/386, linux/amd64, linux/arm/v6
           push: true
