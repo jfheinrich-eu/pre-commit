@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-$PROG=$(which psonoci)
+PROG=$(which psonoci)
 PSONO_CI_API_KEY_ID="$1"
 PSONO_CI_API_SECRET_KEY_HEX="$2"
 PSONO_CI_SERVER_URL="$3"
