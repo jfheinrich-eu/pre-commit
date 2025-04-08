@@ -19,7 +19,7 @@ jobs:
 
       - name: Fetch secrets from PSONO
         id: psono-secrets
-        uses: ./private-actions/psono-secret-provider
+        uses: ./.github/workflows/private-actions/psono-secret-provider
         with:
             ci_api_key_id: ${{ secrets.CI_API_KEY_ID }}
             ci_api_key_secret_hex: ${{ secrets.CI_API_KEY_SECRET_HEX }}
