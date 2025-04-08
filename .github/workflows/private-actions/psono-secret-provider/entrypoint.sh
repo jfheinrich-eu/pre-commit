@@ -9,6 +9,8 @@ SECRET_TYPE="$4"
 SECRET_FIELDS="$5"
 MASK_SECRETS="$6"
 
+echo "ci_server_url: $INPUT_CI_SERVER_URL"
+
 case "$SECRET_TYPE" in
 env)
     command="env-vars get-or-create"
