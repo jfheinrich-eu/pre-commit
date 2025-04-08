@@ -35,11 +35,11 @@ outputs:
 runs:
   using: 'docker'
   image: 'Dockerfile'
-    args:
-      - ${{ inputs.ci_api_key_id }}
-      - ${{ inputs.ci_api_secret_key_hex }}
-      - ${{ inputs.ci_server_url }}
-      - ${{ inputs.secret_type }}
-      - ${{ inputs.secret_id }}
-      - ${{ inputs.secret_fields }}
-      - ${{ inputs.mask_secrets }}
+  args:
+    - ${{ inputs.ci_api_key_id }}
+    - ${{ inputs.ci_api_secret_key_hex }}
+    - ${{ inputs.ci_server_url }}
+    - ${{ inputs.secret_type }}
+    - ${{ inputs.secret_id }}
+    - ${{ inputs.secret_fields }}
+    - ${{ inputs.mask_secrets }}
