@@ -10,13 +10,11 @@ SECRET_FIELDS=()
 MASK_SECRETS=()
 
 if [ "x$INPUT_SECRET_FIELDS" != "x" ]; then
-    IFS=, read line <<<$INPUT_SECRET_FIELDS
-    SECRET_FIELDS=($line)
+    IFS=',' read SECRET_FIELDS <<<$INPUT_SECRET_FIELDS
 fi
 
 if [ "$INPUT_MASK_SECRETS" != "x" ]; then
-    IFS=, read line <<<$INPUT_MASK_SECRETS
-    MASK_SECRETS=($line)
+    IFS=',' read MASK_SECRETS <<<$INPUT_MASK_SECRETS
 fi
 
 case "$SECRET_TYPE" in
@@ -32,14 +30,14 @@ secret)
     ;;
 esac
 
-for f in ${SECRET_FIELDS[*]}; do
+for f in "${SECRET_FIELDS[@]}"; do
     SECRET_VALUE_NAME=$f
 
     $fetched_secret_name="${SECRET_VALUE_NAME}_fetched"
 
     IFS= read -r -d '' "$fetched_secret_name" <<<"$(${PROG} ${command} ${SECRET_ID} {SECRET_VALUE_NAME})"
 
-    for m in ${MASK_SECRETS[*]}; do
+    for m in "${MASK_SECRETS[@]}"; do
         if [ "$m" == "$SECRET_VALUE_NAME" ]; then
             echo "::add-mask::${fetched_secret_name}"
         fi
