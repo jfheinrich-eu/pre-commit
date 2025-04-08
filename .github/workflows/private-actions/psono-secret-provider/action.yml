@@ -34,10 +34,8 @@ outputs:
 
 runs:
   using: 'composite'
+  runs_on: ubuntu-latest
   steps:
-    - name: Sertup Curl
-      uses: kordlib/setup-curl@v1.0.0
-
     - name: Install psonocli
       shell: bash
       run: |
