@@ -18,18 +18,14 @@ MASK_SECRETS=($INPUT_MASK_SECRETS)
 #     IFS=',' read MASK_SECRETS <<<$INPUT_MASK_SECRETS
 # fi
 
-case "$SECRET_TYPE" in
-env)
+if [ "$SECRET_TYPE" = "env" ]; then
     command=(env-vars get-or-create)
-    ;;
-secret)
+elif [ "$SECRET_TYPE" = "secret" ]; then
     command=(secret get)
-    ;;
-*)
+else
     echo "Unknown SECRET_TYPE: $SECRET_TYPE"
     exit 1
-    ;;
-esac
+fi
 
 for f in ${SECRET_FIELDS[@]}; do
     SECRET_VALUE_NAME=$f
