@@ -34,31 +34,53 @@ outputs:
 
 runs:
   using: 'composite'
+  outputs:
+    cache-key: ${{ steps.cache-key.outputs.value }}
   steps:
     - name: Install psonocli
+      id: install-psonoci
       shell: bash
       run: |
+        psonoci="~/psono/psonoci"
         if [ -n "$(which curl)" ]
         then
-          curl https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci --output ${{ github.action_path }}/psonoci >/dev/null
-          chmod +x ${{ github.action_path }}/psonoci
+          mkdir ~/psono
+          curl https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci --output $psonoci >/dev/null
+          chmod +x $psonoci
         elif [ -n "$(which wget)" ]
         then
-          wget --output-document ${{ github.action_path }}/psonoci https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci >/dev/null
-          chmod +x ${{ github.action_path }}/psonoci
+          mkdir ~/psono
+          wget --output-document $psonoci https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci >/dev/null
+          chmod +x $psonoci
         else
           echo "Neither curl nor WGET found. Cancled"
           exit 1
         fi
 
+    - name: Cache Psosnoci
+      uses: actions/cache@v4
+      with:
+        path: ~/psono
+        key: psono-${{ runner.os }}-${{ hashfiles('**/psonoci') }}
+        restore-keys: |
+          psono-${{ runner.os }}-
+
     - name: Fetch secrets from PSONO
+      needs: install-psonoci
       shell: bash
-      run: ${{ github.action_path }}/fetch_secrets.sh
+      run: |
+        if [ -x ~/psono/psonoci ]
+        then
+          ${{ github.action_path }}/fetch_secrets.sh
+        else
+          ls -la ${{ github.action_path }}
+          ls -l ~/psono
+        fi
       env:
         PSONO_CI_API_KEY_ID: ${{ inputs.ci_api_key_id }}
         PSONO_CI_API_SECRET_KEY_HEX: ${{ inputs.ci_api_secret_key_hex }}
         PSONO_CI_SERVER_URL: ${{ inputs.ci_server_url }}
         SECRET_TYPE: ${{ inputs.secret_type }}
         SECRET_ID: ${{ inputs.secret_id }}
-        SECRET_FIELDS: ${{ inputs.secret_value_name }}
+        SECRET_FIELDS: ${{ inputs.secret_fields }}
         MASK_SECRETS: ${{ inputs.mask_secrets }}

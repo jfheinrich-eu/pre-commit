@@ -21,10 +21,11 @@ jobs:
         id: psono-secrets
         uses: ./.github/workflows/private-actions/psono-secret-provider
         with:
-            ci_api_key_id: ${{ secrets.CI_API_KEY_ID }}
-            ci_api_secret_key_hex: ${{ secrets.CI_API_SECRET_KEY_HEX }}
+            ci_api_key_id: ${{ secrets.PSONO_API_KEY_ID }}
+            ci_api_secret_key_hex: ${{ secrets.PSONO_API_SECRET_KEY_HEX }}
             ci_server_url: ${{ secrets.PSONO_SERVER_URL }}
-            secret_id: ${{ secrets.PSONO_GITHUB_CLI_TOKEN}}
+            secret_type: 'secret'
+            secret_id: ${{ secrets.PSONO_GITHUB_CLI_TOKEN }}
             secret_fields: 'username,password'
             mask_secrets: 'password'
 
