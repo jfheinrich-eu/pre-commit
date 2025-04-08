@@ -7,4 +7,4 @@ RUN apk add --update curl bash && \
     chmod +x /usr/bin/psonoci && \
     ls -la /usr/bin/psonoci
 
-ENTRYPOINT [ "/entrypoint.sh" ]
+ENTRYPOINT [ "bash", "/entrypoint.sh" ]
