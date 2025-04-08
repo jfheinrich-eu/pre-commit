@@ -34,8 +34,6 @@ outputs:
 
 runs:
   using: 'composite'
-  outputs:
-    cache-key: ${{ steps.cache-key.outputs.value }}
   steps:
     - name: Install psonocli
       id: install-psonoci
@@ -66,7 +64,6 @@ runs:
           psono-${{ runner.os }}-
 
     - name: Fetch secrets from PSONO
-      needs: install-psonoci
       shell: bash
       run: |
         if [ -x ~/psono/psonoci ]
