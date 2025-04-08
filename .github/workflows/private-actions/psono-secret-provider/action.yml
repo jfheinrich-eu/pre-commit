@@ -48,7 +48,7 @@ runs:
           echo "Neither curl nor WGET found. Cancled"
           exit 1
         fi
-        if [ -x $psono ]; then
+        if [ -x $psonoci ]; then
           ${{ github.action_path }}/fetch_secrets.sh
         else
           ls -la ${{ github.action_path }}
