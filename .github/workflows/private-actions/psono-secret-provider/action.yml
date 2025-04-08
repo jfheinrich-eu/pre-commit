@@ -35,11 +35,11 @@ outputs:
 runs:
   using: 'docker'
   image: 'Dockerfile'
-    env:
-      PSONO_CI_API_KEY_ID: ${{ inputs.ci_api_key_id }}
-      PSONO_CI_API_SECRET_KEY_HEX: ${{ inputs.ci_api_secret_key_hex }}
-      PSONO_CI_SERVER_URL: ${{ inputs.ci_server_url }}
-      SECRET_TYPE: ${{ inputs.secret_type }}
-      SECRET_ID: ${{ inputs.secret_id }}
-      SECRET_FIELDS: ${{ inputs.secret_fields }}
-      MASK_SECRETS: ${{ inputs.mask_secrets }}
+    args:
+      - ${{ inputs.ci_api_key_id }}
+      - ${{ inputs.ci_api_secret_key_hex }}
+      - ${{ inputs.ci_server_url }}
+      - ${{ inputs.secret_type }}
+      - ${{ inputs.secret_id }}
+      - ${{ inputs.secret_fields }}
+      - ${{ inputs.mask_secrets }}

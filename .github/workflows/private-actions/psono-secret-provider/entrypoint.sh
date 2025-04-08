@@ -2,6 +2,12 @@
 set -e
 
 $PROG=$(which psonoci)
+PSONO_CI_API_KEY_ID="$1"
+PSONO_CI_API_SECRET_KEY_HEX="$2"
+PSONO_CI_SERVER_URL="$3"
+SECRET_TYPE="$4"
+SECRET_FIELDS="$5"
+MASK_SECRETS="$6"
 
 case "$SECRET_TYPE" in
 env)
