@@ -1,0 +1,57 @@
+# action.yml
+name: 'PSONO Secret Whisperer'
+description: 'Fetches secrets from PSONO server and makes them available as outputs'
+author: 'J.F.Heinrich'
+branding:
+  icon: 'lock'
+  color: 'blue'
+
+inputs:
+  ci_api_key_id:  # id of input
+    description: 'PSONO API key'
+    required: true
+  ci_api_secret_key_hex:
+    description: 'PSONO API secret key'
+    required: true
+  secret_id:
+    description: 'Secret ID to fetch'
+    required: true
+  ci_server_url:
+    description: 'The URL of the PSONO server, default: https://www.psono.pw/server'
+    default: 'https://www.psono.pw/server'
+  secret_type:
+    description: 'Type of secret tp fetch: env or secret, default: secret'
+    default: 'secret'
+  secret_fields:
+    description: 'Comma-separated list of secret keys to retrieve, default: username,password'
+    default: 'username,password'
+  mask_secrets:
+    description: 'Comma-separated list of secret keys to be masked'
+
+outputs:
+  secrets:
+    description: 'Each secret is available as an individual output'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Sertup Curl
+      uses: kordlib/setup-curl@v1.0.0
+
+    - name: Install psonocli
+      shell: bash
+      run: |
+        curl https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci --output ${{ github.action_path }}/psonoci >/dev/null
+        chmod +x ${{ github.action_path }}/psonoci
+
+    - name: Fetch secrets from PSONO
+      shell: bash
+      run: ${{ github.action_path }}/fetch_secrets.sh
+      env:
+        PSONO_CI_API_KEY_ID: ${{ inputs.ci_api_key_id }}
+        PSONO_CI_API_SECRET_KEY_HEX: ${{ inputs.ci_api_secret_key_hex }}
+        PSONO_CI_SERVER_URL: ${{ inputs.ci_server_url }}
+        SECRET_TYPE: ${{ inputs.secret_type }}
+        SECRET_ID: ${{ inputs.secret_id }}
+        SECRET_FIELDS: ${{ inputs.secret_value_name }}
+        MASK_SECRETS: ${{ inputs.mask_secrets }}
