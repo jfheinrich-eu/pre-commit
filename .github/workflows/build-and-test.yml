@@ -26,7 +26,7 @@ jobs:
             ci_server_url: ${{ secrets.PSONO_SERVER_URL }}
             secret_type: 'secret'
             secret_id: ${{ secrets.PSONO_GITHUB_CLI_TOKEN }}
-            secret_fields: 'username,password'
+            secret_fields: 'username password'
             mask_secrets: 'password'
 
       # Access secrets
