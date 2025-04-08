@@ -66,8 +66,6 @@ runs:
 
     - name: Fetch secrets from PSONO
       shell: bash
-      env:
-        psonoci: ${{ github.action_path }}/psonoci
       run: |
         if [ -x $psono ]
         then
@@ -76,6 +74,7 @@ runs:
           ls -la ${{ github.action_path }}
         fi
       env:
+        psonoci: ${{ github.action_path }}/psonoci
         PSONO_CI_API_KEY_ID: ${{ inputs.ci_api_key_id }}
         PSONO_CI_API_SECRET_KEY_HEX: ${{ inputs.ci_api_secret_key_hex }}
         PSONO_CI_SERVER_URL: ${{ inputs.ci_server_url }}
