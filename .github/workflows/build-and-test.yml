@@ -9,7 +9,7 @@ on:
 jobs:
 
   test-action:
-    runs-on: ubunto-latest
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
