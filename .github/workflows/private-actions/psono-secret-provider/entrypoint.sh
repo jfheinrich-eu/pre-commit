@@ -46,3 +46,5 @@ for f in ${SECRET_FIELDS[@]}; do
 
     echo "${SECRET_VALUE_NAME}=${fetched_secret_name}" >>"$GITHUB_OUTPUT"
 done
+
+exit 0
