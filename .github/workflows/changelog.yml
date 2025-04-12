@@ -1,4 +1,4 @@
-name: Deploy
+name: Create CHANGELOG and new release
 
 on:
   workflow_call:
