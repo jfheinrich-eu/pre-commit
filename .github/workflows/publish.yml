@@ -6,10 +6,12 @@ on:
 jobs:
   secrets-github:
     uses: jfheinrich-eu/reusable-workflows/.github/workflows/secrets-github-registry.yml@master
+    secrets: inherit
   secrets-dockerhub:
     uses: jfheinrich-eu/reusable-workflows/.github/workflows/secrets-dockerhub-registry.yml@master
     with:
       image_name: 'pre-commit'
+    secrets: inherit
 
   publish:
     needs:

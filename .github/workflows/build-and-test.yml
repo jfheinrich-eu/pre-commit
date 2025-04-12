@@ -8,11 +8,12 @@ on:
 
 jobs:
 
-  secrets:
+  psono-secrets:
     uses: jfheinrich-eu/reusable-workflows/.github/workflows/secrets-github-registry.yml@master
+    secrets: inherit
 
   build:
-    needs: secrets
+    needs: psono-secrets
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -25,9 +26,9 @@ jobs:
         name: Docker Login
         uses: docker/login-action@v3.4.0
         with:
-            registry: ${{ needs.secrets.outputs.CI_REGISTRY }}
-            username: ${{ needs.secrets.outputs.CI_REGISTRY_USER }}
-            password: ${{ needs.secrets.outputs.CI_REGISTRY_PASSWORD }}
+            registry: ${{ needs.psono-secrets.outputs.CI_REGISTRY }}
+            username: ${{ needs.psono-secrets.outputs.CI_REGISTRY_USER }}
+            password: ${{ needs.psono-secrets.outputs.CI_REGISTRY_PASSWORD }}
             ecr: auto
             logout: true
 
@@ -41,16 +42,16 @@ jobs:
           context: ./src
           platforms: linux/amd64
           load: true
-          tags: ${{ needs.secrets.outputs.CS_IMAGE_BUILD }}
-          build-args: (BUILD_DATE=${{ needs.secrets.outputs.BUILD_DATE }}, VERSION=${{ needs.secrets.outputs.BUILD_VERSION }})
+          tags: ${{ needs.psono-secrets.outputs.CS_IMAGE_BUILD }}
+          build-args: (BUILD_DATE=${{ needs.psono-secrets.outputs.BUILD_DATE }}, VERSION=${{ needs.psono-secrets.outputs.BUILD_VERSION }})
 
       - name: Scan for vulnerabilities
         id: scan
         uses: crazy-max/ghaction-container-scan@v3.1.0
         with:
-          image: ${{ needs.secrets.outputs.CS_IMAGE_BUILD }}
+          image: ${{ needs.psono-secrets.outputs.CS_IMAGE_BUILD }}
           dockerfile: ./src/Dockerfile
-          github_token: ${{ needs.secrets.outputs.CI_GITHUB_TOKEN }}
+          github_token: ${{ needs.psono-secrets.outputs.CI_GITHUB_TOKEN }}
 
       - name: Upload SARIF file
         if: ${{ steps.scan.outputs.sarif != '' }}
@@ -65,5 +66,5 @@ jobs:
           # depends on the base image python: 3-alpine3.21
           platforms: linux/386, linux/amd64, linux/arm/v6
           push: true
-          tags: ${{ needs.secrets.outputs.CS_IMAGE_BUILD }}
-          build-args: (BUILD_DATE=${{ needs.secrets.outputs.BUILD_DATE }}, VERSION=${{ needs.secrets.outputs.BUILD_VERSION }})
+          tags: ${{ needs.psono-secrets.outputs.CS_IMAGE_BUILD }}
+          build-args: (BUILD_DATE=${{ needs.psono-secrets.outputs.BUILD_DATE }}, VERSION=${{ needs.psono-secrets.outputs.BUILD_VERSION }})

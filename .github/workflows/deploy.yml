@@ -8,6 +8,8 @@ on:
 jobs:
   changelog:
     uses: ./.github/workflows/changelog.yml
+    secrets: inherit
 
   publish-github:
     uses: ./.github/workflows/publish.yml
+    secrets: inherit
