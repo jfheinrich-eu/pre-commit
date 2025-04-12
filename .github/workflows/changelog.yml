@@ -1,12 +1,10 @@
 name: Deploy
 
 on:
-  push:
-    tags:
-      - v[0-9]+.[0-9]+.[0-9]+
+  workflow_call:
 
 jobs:
-  deploy:
+  changelog:
     runs-on: ubuntu-latest
 
     steps:

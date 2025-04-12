@@ -8,100 +8,49 @@ on:
 
 jobs:
 
-  test-action:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Fetch secrets from PSONO
-        id: psono-secrets
-        uses: ./.github/workflows/private-actions/psono-secret-provider
-        with:
-            ci_api_key_id: ${{ secrets.PSONO_API_KEY_ID }}
-            ci_api_secret_key_hex: ${{ secrets.PSONO_API_SECRET_KEY_HEX }}
-            ci_server_url: ${{ secrets.PSONO_SERVER_URL }}
-            secret_type: 'secret'
-            secret_id: ${{ secrets.PSONO_GITHUB_CLI_TOKEN }}
-            secret_fields: 'username password'
-            mask_secrets: 'password'
-
-      # Access secrets
-      - name: Use secrets
-        run: |
-          echo "Username: ${{ steps.psono-secrets.outputs.username }}"
-          echo "password: ${{ steps.psono-secrets.outputs.password }}"
+  secrets:
+    uses: jfheinrich-eu/reusable-workflows/.github/workflows/secrets-github-registry.yml@master
 
   build:
+    needs: secrets
     runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
-    env:
-      PSONO_CI_API_KEY_ID: ${{ secrets.PSONO_API_KEY_ID }}
-      PSONO_CI_API_SECRET_KEY_HEX: ${{ secrets.PSONO_API_SECRET_KEY_HEX }}
-      PSONO_CI_SERVER_URL: ${{ secrets.PSONO_SERVER_URL }}
-      PSONO_DOCKERHUB_REGISTRY_ID: ${{ secrets.PSONO_DOCKERHUB_REGISTRY_ID }}
-      PSONO_GITHUB_REGISTRY_ID: ${{ secrets.PSONO_GITHUB_REGISTRY_ID }}
-      PSONO_GITHUB_TOKEN_ID: ${{ secrets.PSONO_GITHUB_CLI_TOKEN}}
 
     steps:
-      - id: setup-secrets
-        name: Setup secrets
-        run: |
-          sudo apt update >/dev/null && sudo apt install -y curl >/dev/null
-          curl https://get.psono.com/psono/psono-ci/x86_64-linux/psonoci --output psonoci >/dev/null && chmod +x psonoci
-          ci_psono_registry="$(./psonoci env-vars get-or-create ${PSONO_GITHUB_REGISTRY_ID} CI_REGISTRY)"
-          ci_psono_registry_user="$(./psonoci env-vars get-or-create ${PSONO_GITHUB_REGISTRY_ID} CI_REGISTRY_USER)"
-          ci_psono_registry_password="$(./psonoci env-vars get-or-create ${PSONO_GITHUB_REGISTRY_ID} CI_REGISTRY_PASSWORD)"
-          ci_psono_registry_github_token="$(./psonoci secret get ${PSONO_GITHUB_TOKEN_ID} password)"
-          echo "::add-mask::$ci_psono_registry"
-          echo "ci_registry=$ci_psono_registry" >> "$GITHUB_OUTPUT"
-          echo "::add-mask::$ci_psono_registry_user"
-          echo "ci_registry_user=$ci_psono_registry_user" >> "$GITHUB_OUTPUT"
-          echo "::add-mask::$ci_psono_registry_password"
-          echo "ci_registry_password=$ci_psono_registry_password" >> "$GITHUB_OUTPUT"
-          echo "::add-mask::$ci_psono_registry_github_token"
-          echo "ci_registry_github_token=$ci_psono_registry_github_token" >> "$GITHUB_OUTPUT"
-          echo "cs_image=${ci_psono_registry}/${GITHUB_REPOSITORY}:build" >> "$GITHUB_OUTPUT"
-          echo "build_date=$(date --iso-8601=seconds)" >> "$GITHUB_OUTPUT"
-          echo "build_version=${GITHUB_REF_NAME}.${GITHUB_SHA:0:8}" >> "$GITHUB_OUTPUT"
-
       - uses: actions/checkout@v4
 
       - id: docker-login
         name: Docker Login
         uses: docker/login-action@v3.4.0
         with:
-            registry: ${{ steps.setup-secrets.outputs.ci_registry }}
-            username: ${{ steps.setup-secrets.outputs.ci_registry_user }}
-            password: ${{ steps.setup-secrets.outputs.ci_registry_password }}
+            registry: ${{ needs.secrets.outputs.CI_REGISTRY }}
+            username: ${{ needs.secrets.outputs.CI_REGISTRY_USER }}
+            password: ${{ needs.secrets.outputs.CI_REGISTRY_PASSWORD }}
             ecr: auto
             logout: true
 
       - name: Set up Docker buildx
         id: seup-docker-buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v3.10.0
 
       - name: Build and load
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6.15.0
         with:
           context: ./src
           platforms: linux/amd64
           load: true
-          tags: ${{ steps.setup-secrets.outputs.cs_image }}
-          build-args: (BUILD_DATE=${{ steps.setup-secrets.outputs.build_date }}, VERSION=${{ steps.setup-secrets.outputs.build_version }})
+          tags: ${{ needs.secrets.outputs.CS_IMAGE_BUILD }}
+          build-args: (BUILD_DATE=${{ needs.secrets.outputs.BUILD_DATE }}, VERSION=${{ needs.secrets.outputs.BUILD_VERSION }})
 
       - name: Scan for vulnerabilities
         id: scan
-        uses: crazy-max/ghaction-container-scan@v3
+        uses: crazy-max/ghaction-container-scan@v3.1.0
         with:
-          image: ${{ steps.setup-secrets.outputs.cs_image }}
+          image: ${{ needs.secrets.outputs.CS_IMAGE_BUILD }}
           dockerfile: ./src/Dockerfile
-          github_token: ${{ steps.setup-secrets.outputs.ci_registry_github_token }}
+          github_token: ${{ needs.secrets.outputs.CI_GITHUB_TOKEN }}
 
       - name: Upload SARIF file
         if: ${{ steps.scan.outputs.sarif != '' }}
@@ -110,11 +59,11 @@ jobs:
           sarif_file: ${{ steps.scan.outputs.sarif }}
 
       - name: Build and push
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6.15.0
         with:
           context: ./src
           # depends on the base image python: 3-alpine3.21
           platforms: linux/386, linux/amd64, linux/arm/v6
           push: true
-          tags: ${{ steps.setup-secrets.outputs.cs_image }}
-          build-args: (BUILD_DATE=${{ steps.setup-secrets.outputs.build_date }}, VERSION=${{ steps.setup-secrets.outputs.build_version }})
+          tags: ${{ needs.secrets.outputs.CS_IMAGE_BUILD }}
+          build-args: (BUILD_DATE=${{ needs.secrets.outputs.BUILD_DATE }}, VERSION=${{ needs.secrets.outputs.BUILD_VERSION }})
