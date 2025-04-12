@@ -72,3 +72,11 @@ jobs:
             ${{ needs.secrets-dockerhub.outputs.CS_IMAGE_PUBLISH }}
           build-args: (BUILD_DATE=${{ needs.secrets-github.outputs.BUILD_DATE }}, VERSION=${{ needs.secrets-github.outputs.PUBLISH_VERSION }})
 
+      - name: Update repo description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ needs.secrets-dockerhub.outputs.CI_REGISTRY_USER }}
+          password: ${{ needs.secrets-dockerhub.outputs.CI_REGISTRY_PASSWORD }}
+          repository: jfheinrich/pre-commit
+          short-description: ${{ github.event.repository.description }}
+          enable-url-completion: true
