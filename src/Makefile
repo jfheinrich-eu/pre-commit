@@ -2,7 +2,7 @@ ifeq ($(OS),)
 	OS := $(shell uname -s)
 endif
 ifeq ($(image_tag),)
-	image_tag := $(shell cat ../.build-version)
+	image_tag := $(shell cat .build-version)
 endif
 ifeq ($(build_date),)
 	build_date := $(shell date --iso-8601=seconds)
