@@ -1,0 +1,118 @@
+name: Publish
+
+on:
+  workflow_call:
+    inputs:
+      image_name:
+        required: true
+        type: string
+
+jobs:
+
+  publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Get GitHub Registry Secrets
+        id: github-registry-secrets
+        uses: jfheinrich-eu/psono-secret-whisperer@develop
+        with:
+          ci_api_key_id: ${{ secrets.PSONO_API_KEY_ID }}
+          ci_api_secret_key_hex: ${{ secrets.PSONO_API_SECRET_KEY_HEX }}
+          ci_server_url: ${{ vars.PSONO_SERVER_URL }}
+          secret_id: ${{ secrets.PSONO_GITHUB_REGISTRY_ID }}
+          secret_type: 'env'
+          secret_fields: "CI_REGISTRY,CI_REGISTRY_USER,CI_REGISTRY_PASSWORD"
+          mask_secrets: CI_REGISTRY_USER,CI_REGISTRY_PASSWORD
+
+      - name: Get DockerHub Registry Secrets
+        id: dockerhub-registry-secrets
+        uses: jfheinrich-eu/psono-secret-whisperer@develop
+        with:
+          ci_api_key_id: ${{ secrets.PSONO_API_KEY_ID }}
+          ci_api_secret_key_hex: ${{ secrets.PSONO_API_SECRET_KEY_HEX }}
+          ci_server_url: ${{ vars.PSONO_SERVER_URL }}
+          secret_id: ${{ secrets.PSONO_DOCKERHUB_REGISTRY_ID }}
+          secret_type: 'env'
+          secret_fields: "CI_REGISTRY,CI_REGISTRY_USER,CI_REGISTRY_PASSWORD,CI_REGISTRY_IMAGE_PREFIX"
+          mask_secrets: CI_REGISTRY_USER,CI_REGISTRY_PASSWORD
+
+      - name: Get GitHub Token
+        id: github-token
+        uses: jfheinrich-eu/psono-secret-whisperer@develop
+        with:
+          ci_api_key_id: ${{ secrets.PSONO_API_KEY_ID }}
+          ci_api_secret_key_hex: ${{ secrets.PSONO_API_SECRET_KEY_HEX }}
+          ci_server_url: ${{ vars.PSONO_SERVER_URL }}
+          secret_id: ${{ secrets.PSONO_GITHUB_CLI_TOKEN }}
+          secret_type: 'secret'
+          secret_fields: "password"
+          mask_secrets: password
+
+
+      - id: setup-secrets
+        name: Setup secrets
+        env:
+          GITHUB_CI_REGISTRY: ${{ steps.github-registry-secrets.outputs.secret1 }}
+          DOCKERHUB_CI_REGISTRY: ${{ steps.dockerhub-registry-secrets.outputs.secret1 }}
+          DOCKERHUB_CI_REGISTRY_PREFIX: ${{ steps.dockerhub-registry-secrets.outputs.secret4 }}
+          DOCKERHUB_CI_REGISTRY_SUFFIX: ${{ inputs.image_name }}
+        run: |
+          echo "build_date=$(date --iso-8601=seconds)" >> "$GITHUB_OUTPUT"
+          echo "publish_version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          echo "cs_github_image_publish=${GITHUB_CI_REGISTRY}/${GITHUB_REPOSITORY}:${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          echo "cs_github_image_latest=${GITHUB_CI_REGISTRY}/${GITHUB_REPOSITORY}:latest" >> "$GITHUB_OUTPUT"
+          echo "cs_image_publish=${DOCKERHUB_CI_REGISTRY}/${DOCKERHUB_CI_REGISTRY_PREFIX}/${DOCKERHUB_CI_REGISTRY_SUFFIX:${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          echo "cs_image_latest=${DOCKERHUB_CI_REGISTRY}/${DOCKERHUB_CI_REGISTRY_PREFIX}/${DOCKERHUB_CI_REGISTRY_SUFFIX:latest" >> "$GITHUB_OUTPUT"
+
+      - id: github-docker-login
+        name: GitHub Docker Login
+        uses: docker/login-action@v3.4.0
+        with:
+            registry: ${{ steps.dockerhub-registry-secrets.outputs.secret1 }}
+            username: ${{ steps.dockerhub-registry-secrets.outputs.secret2 }}
+            password: ${{ steps.dockerhub-registry-secrets.outputs.secret3 }}
+            ecr: auto
+            logout: true
+
+      - id: dockerhub-docker-login
+        name: DockerHub Docker Login
+        uses: docker/login-action@v3.4.0
+        with:
+            username: ${{ steps.github-registry-secrets.outputs.secret2 }}
+            password: ${{ steps.github-registry-secrets.outputs.secret3 }}
+            ecr: auto
+            logout: true
+
+      - name: Set up Docker buildx
+        id: setup-docker-buildx
+        uses: docker/setup-buildx-action@v3.10.0
+
+      - name: Build and push
+        uses: docker/build-push-action@v6.15.0
+        with:
+          context: ./src
+          # depends on the base image python: 3-alpine3.21
+          platforms: linux/386, linux/amd64, linux/arm/v6
+          push: true
+          tags: |
+            ${{ steps.setup-secrets.outputs.cs_github_image_publish }}
+            ${{ steps.setup-secrets.outputs.cs_github_image_latest }}
+            ${{ steps.setup-secrets.outputs.cs_image_publish }}
+            ${{ steps.setup-secrets.outputs.cs_image_latest }}
+          build-args: (BUILD_DATE=${{ steps.setup-secrets.outputs.build_date }}, VERSION=${{ steps.setup-secrets.outputs.publish_version }})
+
+      - name: Update repo description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ steps.dockerhub-registry-secrets.outputs.secret2 }}
+          password: ${{ steps.dockerhub-registry-secrets.outputs.secret3 }}
+          repository: jfheinrich/pre-commit
+          short-description: ${{ github.event.repository.description }}
+          enable-url-completion: true

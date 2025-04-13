@@ -7,16 +7,8 @@ endif
 ifeq ($(build_date),)
 	build_date := $(shell date --iso-8601=seconds)
 endif
-ifeq ($(GITHUB_REPOSITORY),)
-	repository := jfheinrich-dev/pre-commit
-else
-	repository := $(GITHUB_REPOSITORY)
-endif
-ifeq ($(CI_COMMIT_REF_SLUG),)
-	CI_COMMIT_REF_SLUG := $(GITHUB_REF)
-endif
-ifeq ($(CI_COMMIT_SHORT_SHA),)
-	CI_COMMIT_SHORT_SHA := $${GITHUB_SHA:0:8}
+ifeq ($(image),)
+	image := ghcr.io/jfheinrich-eu/pre-commit
 endif
 
 platform := "linux/arm64,linux/amd64,linux/amd64/v2,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/mips64le,linux/arm/v7,linux/arm/v6"
@@ -26,7 +18,7 @@ build-and-push: use-orbstack use-parallel-builder --docker-buildx
 build: --use-orbstack --use-parallel-builder --docker-build scout
 
 scout:
-	docker scout cves jfheinrich/pre-commit:$(image_tag)
+	docker scout cves $(image):$(image_tag)
 
 docker-login:
 	@[[ "${OS}" != "Darwin" ]] || security unlock-keychain
@@ -41,10 +33,10 @@ create-parallel-builder:
 # Private Targets
 
 --docker-buildx:
-	docker buildx build --build-arg BUILD_DATE="$(build_date)" --build-arg VERSION=$(image_tag) --platform=$(platform) --push -t jfheinrich/pre-commit:$(image_tag) -t jfheinrich/pre-commit:latest .
+	docker buildx build --build-arg BUILD_DATE="$(build_date)" --build-arg VERSION=$(image_tag) --platform=$(platform) --push -t $(image):$(image_tag) -t $(image):latest .
 
 --docker-build:
-	docker build --build-arg VERSION=$(image_tag) --build-arg BUILD_DATE="$(build_date)" -t jfheinrich/pre-commit:$(image_tag) .
+	docker build --build-arg VERSION=$(image_tag) --build-arg BUILD_DATE="$(build_date)" -t $(image):$(image_tag) .
 
 --use-parallel-builder:
 	docker buildx use mybuilder
