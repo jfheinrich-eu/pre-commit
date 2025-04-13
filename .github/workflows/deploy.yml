@@ -12,4 +12,6 @@ jobs:
 
   publish-github:
     uses: ./.github/workflows/publish.yml
+    with:
+      image_name: 'pre-commit'
     secrets: inherit

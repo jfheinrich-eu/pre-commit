@@ -8,12 +8,7 @@ on:
 
 jobs:
 
-  psono-secrets:
-    uses: jfheinrich-eu/reusable-workflows/.github/workflows/secrets-github-registry.yml@master
-    secrets: inherit
-
   build:
-    needs: psono-secrets
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -22,13 +17,46 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Get GitHub Registry Secrets
+        id: github-registry-secrets
+        uses: jfheinrich-eu/psono-secret-whisperer@develop
+        with:
+          ci_api_key_id: ${{ secrets.PSONO_API_KEY_ID }}
+          ci_api_secret_key_hex: ${{ secrets.PSONO_API_SECRET_KEY_HEX }}
+          ci_server_url: ${{ vars.PSONO_SERVER_URL }}
+          secret_id: ${{ secrets.PSONO_GITHUB_REGISTRY_ID }}
+          secret_type: 'env'
+          secret_fields: "CI_REGISTRY,CI_REGISTRY_USER,CI_REGISTRY_PASSWORD"
+          mask_secrets: CI_REGISTRY_USER,CI_REGISTRY_PASSWORD
+
+      - name: Get GitHub Token
+        id: github-token
+        uses: jfheinrich-eu/psono-secret-whisperer@develop
+        with:
+          ci_api_key_id: ${{ secrets.PSONO_API_KEY_ID }}
+          ci_api_secret_key_hex: ${{ secrets.PSONO_API_SECRET_KEY_HEX }}
+          ci_server_url: ${{ vars.PSONO_SERVER_URL }}
+          secret_id: ${{ secrets.PSONO_GITHUB_CLI_TOKEN }}
+          secret_type: 'secret'
+          secret_fields: "password"
+          mask_secrets: password
+
+      - id: setup-secrets
+        name: Setup secrets
+        env:
+          GITHUB_CI_REGISTRY: ${{ steps.github-registry-secrets.outputs.secret1 }}
+        run: |
+          echo "cs_image_build=${GITHUB_CI_REGISTRY}/${GITHUB_REPOSITORY}:build" >> "$GITHUB_OUTPUT"
+          echo "build_date=$(date --iso-8601=seconds)" >> "$GITHUB_OUTPUT"
+          echo "build_version=${GITHUB_REF_NAME}.${GITHUB_SHA:0:8}" >> "$GITHUB_OUTPUT"
+
       - id: docker-login
         name: Docker Login
         uses: docker/login-action@v3.4.0
         with:
-            registry: ${{ needs.psono-secrets.outputs.CI_REGISTRY }}
-            username: ${{ needs.psono-secrets.outputs.CI_REGISTRY_USER }}
-            password: ${{ needs.psono-secrets.outputs.CI_REGISTRY_PASSWORD }}
+            registry: ${{ steps.github-registry-secrets.outputs.secret1 }}
+            username: ${{ steps.github-registry-secrets.outputs.secret2 }}
+            password: ${{ steps.github-registry-secrets.outputs.secret3 }}
             ecr: auto
             logout: true
 
@@ -42,16 +70,16 @@ jobs:
           context: ./src
           platforms: linux/amd64
           load: true
-          tags: ${{ needs.psono-secrets.outputs.CS_IMAGE_BUILD }}
-          build-args: (BUILD_DATE=${{ needs.psono-secrets.outputs.BUILD_DATE }}, VERSION=${{ needs.psono-secrets.outputs.BUILD_VERSION }})
+          tags: ${{ steps.setup-secrets.outputs.cs_image_build }}
+          build-args: (BUILD_DATE=${{ steps.setup-secrets.outputs.build_date }}, VERSION=${{ steps.setup-secrets.outputs.build_version }})
 
       - name: Scan for vulnerabilities
         id: scan
         uses: crazy-max/ghaction-container-scan@v3.1.0
         with:
-          image: ${{ needs.psono-secrets.outputs.CS_IMAGE_BUILD }}
+          image: ${{ steps.setup-secrets.outputs.cs_image_build }}
           dockerfile: ./src/Dockerfile
-          github_token: ${{ needs.psono-secrets.outputs.CI_GITHUB_TOKEN }}
+          github_token: ${{ steps.github-token.outputs.secret1 }}
 
       - name: Upload SARIF file
         if: ${{ steps.scan.outputs.sarif != '' }}
@@ -66,5 +94,5 @@ jobs:
           # depends on the base image python: 3-alpine3.21
           platforms: linux/386, linux/amd64, linux/arm/v6
           push: true
-          tags: ${{ needs.psono-secrets.outputs.CS_IMAGE_BUILD }}
-          build-args: (BUILD_DATE=${{ needs.psono-secrets.outputs.BUILD_DATE }}, VERSION=${{ needs.psono-secrets.outputs.BUILD_VERSION }})
+          tags: ${{ steps.setup-secrets.outputs.cs_image_build }}
+          build-args: (BUILD_DATE=${{ steps.setup-secrets.outputs.build_date }}, VERSION=${{ steps.setup-secrets.outputs.build_version }})
