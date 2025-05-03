@@ -8,6 +8,9 @@ jobs:
   generate-pr-description:
     name: Generate the description on the pull request
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     defaults:
       run:
         shell: bash
@@ -31,6 +34,9 @@ jobs:
     needs: generate-pr-description
     name: Validate Release Label and Notes
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     defaults:
       run:
         shell: bash
