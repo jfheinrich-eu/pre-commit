@@ -1,2 +1,6 @@
 jfheinrich/
+.gh-audit-output/
 .gitlab-ci-wip.yml
+release_notes.md
+.psonoci.toml
+.env.local

@@ -1,4 +1,13 @@
 {
+    "git.enableCommitSigning": true,
     "jira-plugin.workingProject": "",
-    "makefile.makefilePath": "."
+    "makefile.makefilePath": ".",
+    "command-runner.terminal.name": "Run Command",
+    "command-runner.terminal.autoClear": true,
+    "command-runner.terminal.autoFocus": true,
+    "command-runner.commands": {
+        "run pre-commit on staged files": "docker run --rm -it -v $(pwd):/builds jfheinrich/pre-commit:latest --env \"SKIP=check-executables-have-shebangs\" --no-build-in-config -- run --config .pre-commit-config.yaml --color always",
+        "run pre-commit on all files": "docker run --rm -it -v $(pwd):/builds jfheinrich/pre-commit:latest --env \"SKIP=check-executables-have-shebangs\" --no-build-in-config -- run --config .pre-commit-config.yaml --color always --all-files"
+    },
+    "scm.alwaysShowRepositories": false
 }

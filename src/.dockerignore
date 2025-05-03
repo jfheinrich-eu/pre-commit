@@ -1,0 +1,15 @@
+.gitlab-ci/
+.github/
+.gh-audit-output/
+.vscode/
+jfheinrich/
+.git/
+.gitlab-ci*.yml
+.psonoci.toml
+.talismanrc
+CHNAGELOG.md
+GitVersion.yml
+LICENSE
+Makefile
+*.md
+.env.local
