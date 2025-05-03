@@ -1,8 +1,5 @@
 name: Deploy
 
-permissions:
-  contents: read
-
 on:
   push:
     tags:
@@ -10,10 +7,15 @@ on:
 
 jobs:
   changelog:
+    permissions:
+      contents: write
     uses: ./.github/workflows/changelog.yml
     secrets: inherit
 
   publish-github:
+    permissions:
+      contents: read
+      packages: write
     uses: ./.github/workflows/publish.yml
     with:
       image_name: 'pre-commit'
