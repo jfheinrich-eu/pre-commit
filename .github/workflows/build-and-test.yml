@@ -80,6 +80,8 @@ jobs:
           image: ${{ steps.setup-secrets.outputs.cs_image_build }}
           dockerfile: ./src/Dockerfile
           github_token: ${{ steps.github-token.outputs.secret1 }}
+          annotations: true
+          severity_threshold: MEDIUM
 
       - name: Upload SARIF file
         if: ${{ steps.scan.outputs.sarif != '' }}
