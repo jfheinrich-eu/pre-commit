@@ -13,9 +13,9 @@ endif
 
 platform := "linux/arm64,linux/amd64,linux/amd64/v2,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/mips64le,linux/arm/v7,linux/arm/v6"
 
-build-and-push: use-orbstack use-parallel-builder --docker-buildx
+build-and-push: --docker-buildx
 
-build: --use-orbstack --use-parallel-builder --docker-build scout
+build: --docker-build scout
 
 scout:
 	docker scout cves $(image):$(image_tag)
