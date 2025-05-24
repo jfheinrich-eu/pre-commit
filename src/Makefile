@@ -11,7 +11,7 @@ ifeq ($(image),)
 	image := ghcr.io/jfheinrich-eu/pre-commit
 endif
 
-platform := "linux/arm64,linux/amd64,linux/amd64/v2,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/mips64le,linux/arm/v7,linux/arm/v6"
+platform := "linux/arm64,linux/amd64,linux/amd64/v2,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/arm/v7,linux/arm/v6"
 
 build-and-push: --docker-buildx
 
@@ -21,7 +21,6 @@ scout:
 	docker scout cves $(image):$(image_tag)
 
 docker-login:
-	@[[ "${OS}" != "Darwin" ]] || security unlock-keychain
 	@(if [ -z "${DOCKERUSER}" ]; then echo "Please set the environment variable for the docker user!"; else echo "Docker Login: "; docker login -u ${DOCKERUSER}; fi)
 
 docker-logout:
