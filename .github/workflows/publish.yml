@@ -81,7 +81,7 @@ jobs:
         with:
             registry: ${{ steps.github-registry-secrets.outputs.secret1 }}
             username: ${{ steps.github-registry-secrets.outputs.secret2 }}
-            password: ${{ steps.github-registry-secrets.outputs.secret3 }}
+            password: ${{ steps.github-token.outputs.secret1 }}
             ecr: auto
             logout: true
 
